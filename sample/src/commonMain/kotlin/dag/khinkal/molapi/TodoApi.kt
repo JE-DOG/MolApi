@@ -35,7 +35,7 @@ public class TodoApi(
 }
 
 public data class MolApiClientConfig(
-    public val isEnabled: Boolean = false,
+    public val isEnabled: Boolean = true,
     public val registry: HttpApiMockRegistry = InMemoryApiMockRegistry(),
 )
 

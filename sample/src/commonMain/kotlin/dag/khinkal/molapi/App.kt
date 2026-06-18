@@ -25,6 +25,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -33,11 +34,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import dag.khinkal.molapi.http.editor.HttpMockEditorScreen
 import dag.khinkal.molapi.http.registry.HttpApiMockRegistry
+import kotlinx.coroutines.launch
 
 @Composable
 public fun App(
     molApiConfig: MolApiClientConfig = MolApiClientConfig(),
 ) {
+    val coroutineScope = rememberCoroutineScope()
+
     MaterialTheme {
         val client = remember(molApiConfig) { createTodoHttpClient(molApiConfig) }
         val api = remember(client) { TodoApi(client) }
@@ -61,6 +65,15 @@ public fun App(
             uiState = uiState,
             isEditorEnabled = molApiConfig.isEnabled,
             onOpenEditorClick = { isEditorVisible = true },
+            onRefresh = {
+                coroutineScope.launch {
+                    uiState = try {
+                        TodoUiState.Content(api.fetchTodo())
+                    } catch (error: Throwable) {
+                        TodoUiState.Error(error.message ?: "Failed to load todos")
+                    }
+                }
+            },
         )
         if (molApiConfig.isEnabled && isEditorVisible) {
             HttpMockEditorDialog(
@@ -82,6 +95,7 @@ private fun TodoScreen(
     uiState: TodoUiState,
     isEditorEnabled: Boolean,
     onOpenEditorClick: () -> Unit,
+    onRefresh: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Surface(
@@ -105,6 +119,9 @@ private fun TodoScreen(
                     style = MaterialTheme.typography.headlineMedium,
                     fontWeight = FontWeight.Bold,
                 )
+                Button(onClick = onRefresh) {
+                    Text("Refresh")
+                }
                 if (isEditorEnabled) {
                     Button(onClick = onOpenEditorClick) {
                         Text("Open editor")
@@ -231,6 +248,7 @@ private fun TodoScreenPreview() {
             ),
             isEditorEnabled = true,
             onOpenEditorClick = {},
+            onRefresh = {},
         )
     }
 }
