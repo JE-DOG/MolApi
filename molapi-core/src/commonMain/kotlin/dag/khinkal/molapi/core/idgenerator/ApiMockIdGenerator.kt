@@ -1,16 +1,15 @@
-package dag.khinkal.molapi.core.registry
+package dag.khinkal.molapi.core.idgenerator
 
 import dag.khinkal.molapi.core.matcher.ApiRequestMatcher
-import dag.khinkal.molapi.core.model.ApiMock
 import dag.khinkal.molapi.core.model.ApiRequest
 import dag.khinkal.molapi.core.model.ApiResponse
 
-public interface ReadApiMockRegistry<
+public interface ApiMockIdGenerator<
         Request : ApiRequest,
         Matcher : ApiRequestMatcher<Request>,
         Response : ApiResponse,
-        Id : Any,
+        out Id : Any,
         > {
 
-    public fun find(request: Request): ApiMock<Request, Matcher, Response, Id>?
+    public fun generateId(matcher: Matcher, response: Response): Id
 }

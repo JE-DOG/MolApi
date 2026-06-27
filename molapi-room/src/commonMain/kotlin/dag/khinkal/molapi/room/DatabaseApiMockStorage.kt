@@ -10,10 +10,7 @@ internal interface ApiMockStorage {
 
     fun add(record: RoomApiMockRecord)
 
-    fun remove(
-        response: String,
-        matcher: String,
-    ): Boolean
+    fun remove(id: String): Boolean
 
     fun clear()
 }
@@ -30,14 +27,8 @@ internal class DatabaseApiMockStorage(
         dao.insert(record.toEntity())
     }
 
-    override fun remove(
-        response: String,
-        matcher: String,
-    ): Boolean = runBlocking {
-        val result = dao.deleteBy(
-            matcher = matcher,
-            response = response,
-        )
+    override fun remove(id: String): Boolean = runBlocking {
+        val result = dao.deleteById(id)
 
         result > 0
     }

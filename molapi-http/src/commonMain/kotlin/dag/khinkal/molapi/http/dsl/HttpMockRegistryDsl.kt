@@ -1,7 +1,6 @@
 package dag.khinkal.molapi.http.dsl
 
 import dag.khinkal.molapi.http.matcher.BaseHttpRequestMatcher
-import dag.khinkal.molapi.http.model.BaseHttpApiMock
 import dag.khinkal.molapi.http.model.Headers
 import dag.khinkal.molapi.http.model.HttpBody
 import dag.khinkal.molapi.http.model.HttpMethod
@@ -443,14 +442,12 @@ private fun HttpApiMockRegistry.registerHttpMock(
     response: HttpResponse,
 ) {
     add(
-        BaseHttpApiMock(
-            matcher = BaseHttpRequestMatcher(
-                url = url,
-                method = method,
-                headers = headers,
-                body = body,
-            ),
-            response = response,
+        response = response,
+        matcher = BaseHttpRequestMatcher(
+            url = url,
+            method = method,
+            headers = headers,
+            body = body,
         ),
     )
 }

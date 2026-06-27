@@ -1,5 +1,6 @@
 package dag.khinkal.molapi.core.registry
 
+import dag.khinkal.molapi.core.idgenerator.ApiMockIdGenerator
 import dag.khinkal.molapi.core.matcher.ApiRequestMatcher
 import dag.khinkal.molapi.core.model.ApiMock
 import dag.khinkal.molapi.core.model.ApiRequest
@@ -9,14 +10,29 @@ import kotlinx.coroutines.flow.StateFlow
 public interface ApiMockRegistry<
         Request : ApiRequest,
         Matcher : ApiRequestMatcher<Request>,
-        Response : ApiResponse
-        > : ReadApiMockRegistry<Request, Matcher, Response> {
+        Response : ApiResponse,
+        Id : Any,
+        > : ReadApiMockRegistry<Request, Matcher, Response, Id> {
 
-    public val mocks: StateFlow<List<ApiMock<Request, Matcher, Response>>>
+    public val idGenerator: ApiMockIdGenerator<Request, Matcher, Response, Id>
 
-    public fun add(mock: ApiMock<Request, Matcher, Response>)
+    public val mocks: StateFlow<List<ApiMock<Request, Matcher, Response, Id>>>
 
-    public fun remove(mock: ApiMock<Request, Matcher, Response>): Boolean
+    public fun add(response: Response, matcher: Matcher)
+
+    public fun remove(id: Id): Boolean
 
     public fun clear()
 }
+
+public fun <
+        Request : ApiRequest,
+        Matcher : ApiRequestMatcher<Request>,
+        Response : ApiResponse,
+        Id : Any,
+        > ApiMockRegistry<Request, Matcher, Response, Id>.add(
+    mock: ApiMock<Request, Matcher, Response, Id>,
+): Unit = add(
+    response = mock.response,
+    matcher = mock.matcher,
+)

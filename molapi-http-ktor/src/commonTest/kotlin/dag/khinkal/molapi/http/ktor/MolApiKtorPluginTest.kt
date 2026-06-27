@@ -1,12 +1,12 @@
 package dag.khinkal.molapi.http.ktor
 
+import dag.khinkal.molapi.http.dsl.get
+import dag.khinkal.molapi.http.dsl.post
 import dag.khinkal.molapi.http.ktor.plugin.MolApiKtorPlugin
-import dag.khinkal.molapi.http.matcher.BaseHttpRequestMatcher
-import dag.khinkal.molapi.http.model.BaseHttpApiMock
 import dag.khinkal.molapi.http.model.Headers
-import dag.khinkal.molapi.http.model.HttpMethod
 import dag.khinkal.molapi.http.model.HttpResponse
 import dag.khinkal.molapi.http.model.JsonBody
+import dag.khinkal.molapi.http.registry.HttpInMemoryApiMockRegistry
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
 import io.ktor.client.engine.mock.respond
@@ -24,21 +24,14 @@ class MolApiKtorPluginTest {
     @Test
     fun returnsMockResponseWhenRegistryFindsMatch() = runTest {
         var realRequestCount = 0
-        val registry = dag.khinkal.molapi.http.registry.HttpApiMockRegistry().apply {
-            add(
-                BaseHttpApiMock(
-                    url = "tasks_mock",
-                    matcher = BaseHttpRequestMatcher(
-                        urlRegex = "https://some.com/tasks",
-                        method = HttpMethod.GET
-                    ),
-                    response = HttpResponse(
-                        headers = Headers.empty(),
-                        body = JsonBody("""{"tasks":[]}"""),
-                        statusCode = 201
-                    )
+        val registry = HttpInMemoryApiMockRegistry().apply {
+            get("https://some.com/tasks") {
+                HttpResponse(
+                    headers = Headers.empty(),
+                    body = JsonBody("""{"tasks":[]}"""),
+                    statusCode = 201,
                 )
-            )
+            }
         }
         val client = HttpClient(
             MockEngine {
@@ -70,7 +63,7 @@ class MolApiKtorPluginTest {
             }
         ) {
             install(MolApiKtorPlugin) {
-                registry = dag.khinkal.molapi.http.registry.HttpApiMockRegistry()
+                registry = HttpInMemoryApiMockRegistry()
             }
         }
 
@@ -85,21 +78,16 @@ class MolApiKtorPluginTest {
 
     @Test
     fun matchesRequestBodyWhenKtorRequestHasTextBody() = runTest {
-        val registry = dag.khinkal.molapi.http.registry.HttpApiMockRegistry().apply {
-            add(
-                BaseHttpApiMock(
-                    url = "create_task_mock",
-                    matcher = BaseHttpRequestMatcher(
-                        urlRegex = "https://some.com/tasks",
-                        method = HttpMethod.POST,
-                        body = JsonBody("{}")
-                    ),
-                    response = HttpResponse(
-                        headers = Headers.empty(),
-                        body = JsonBody("""{"created":true}""")
-                    )
+        val registry = HttpInMemoryApiMockRegistry().apply {
+            post(
+                "https://some.com/tasks",
+                body = JsonBody("{}"),
+            ) {
+                HttpResponse(
+                    headers = Headers.empty(),
+                    body = JsonBody("""{"created":true}"""),
                 )
-            )
+            }
         }
         val client = HttpClient(
             MockEngine {

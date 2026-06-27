@@ -14,11 +14,8 @@ internal interface RoomApiMockDao {
     @Insert
     suspend fun insert(entity: RoomApiMockEntity)
 
-    @Query("DELETE FROM api_mocks WHERE response = :response AND matcher = :matcher")
-    suspend fun deleteBy(
-        response: String,
-        matcher: String,
-    ): Int
+    @Query("DELETE FROM api_mocks WHERE id = :id")
+    suspend fun deleteById(id: String): Int
 
     @Query("DELETE FROM api_mocks")
     suspend fun deleteAll()

@@ -9,4 +9,5 @@ public typealias HttpApiMockRegistry = ApiMockRegistry<
         HttpRequest,
         ApiRequestMatcher<HttpRequest>,
         HttpResponse,
+        Any,
         >

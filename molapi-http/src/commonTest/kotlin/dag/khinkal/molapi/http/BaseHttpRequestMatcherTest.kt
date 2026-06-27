@@ -14,18 +14,18 @@ class BaseHttpRequestMatcherTest {
 
     @Test
     fun matchesByUrl() {
-        val matcher = BaseHttpRequestMatcher(urlRegex = "https://some.com/tasks")
+        val matcher = BaseHttpRequestMatcher(url = "https://some.com/tasks")
 
         assertTrue(matcher.matches(testRequest(url = "https://some.com/tasks")))
         assertFalse(matcher.matches(testRequest(url = "https://some.com/users")))
     }
 
     @Test
-    fun matchesByUrlRegex() {
-        val matcher = BaseHttpRequestMatcher(url = Regex("""https://some\.com/tasks/\d+"""))
+    fun matchesByUrlPart() {
+        val matcher = BaseHttpRequestMatcher(url = "/tasks/")
 
         assertTrue(matcher.matches(testRequest(url = "https://some.com/tasks/42")))
-        assertFalse(matcher.matches(testRequest(url = "https://some.com/tasks/latest")))
+        assertFalse(matcher.matches(testRequest(url = "https://some.com/users/42")))
     }
 
     @Test

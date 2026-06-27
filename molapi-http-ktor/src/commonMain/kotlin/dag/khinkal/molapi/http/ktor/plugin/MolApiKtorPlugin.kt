@@ -15,7 +15,8 @@ public class MolApiKtorPluginConfig {
     public var registry: ReadApiMockRegistry<
             HttpRequest,
             ApiRequestMatcher<HttpRequest>,
-            HttpResponse
+            HttpResponse,
+            *,
             >? = null
 }
 

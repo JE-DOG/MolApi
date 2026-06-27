@@ -1,9 +1,11 @@
 package dag.khinkal.molapi.room
 
+import dag.khinkal.molapi.core.idgenerator.ApiMockIdGenerator
 import dag.khinkal.molapi.core.matcher.ApiRequestMatcher
 import dag.khinkal.molapi.core.model.ApiMock
 import dag.khinkal.molapi.core.model.ApiRequest
 import dag.khinkal.molapi.core.model.ApiResponse
+import dag.khinkal.molapi.core.model.BaseApiMock
 import dag.khinkal.molapi.core.registry.ApiMockRegistry
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -17,15 +19,18 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.runBlocking
 
+// TODO: Remote runBlocking
 public class RoomApiMockRegistry<
         Request : ApiRequest,
         Matcher : ApiRequestMatcher<Request>,
-        Response : ApiResponse
+        Response : ApiResponse,
+        Id : Any,
         > internal constructor(
     private val storage: ApiMockStorage,
-    private val parser: ApiMockParser<Request, Matcher, Response>,
+    private val parser: ApiMockParser<Request, Matcher, Response, Id>,
+    public override val idGenerator: ApiMockIdGenerator<Request, Matcher, Response, Id>,
     private val coroutineScope: CoroutineScope,
-) : ApiMockRegistry<Request, Matcher, Response> {
+) : ApiMockRegistry<Request, Matcher, Response, Id> {
 
     init {
         storage.observeAll()
@@ -38,50 +43,56 @@ public class RoomApiMockRegistry<
     }
 
     private val _mocks =
-        MutableStateFlow<List<ApiMock<Request, Matcher, Response>>>(emptyList())
-    override val mocks: StateFlow<List<ApiMock<Request, Matcher, Response>>> = _mocks.asStateFlow()
+        MutableStateFlow<List<ApiMock<Request, Matcher, Response, Id>>>(emptyList())
+    override val mocks: StateFlow<List<ApiMock<Request, Matcher, Response, Id>>> =
+        _mocks.asStateFlow()
 
     public constructor(
         database: MolApiRoomDatabase,
-        parser: ApiMockParser<Request, Matcher, Response>,
+        parser: ApiMockParser<Request, Matcher, Response, Id>,
+        idGenerator: ApiMockIdGenerator<Request, Matcher, Response, Id>,
         coroutineScope: CoroutineScope,
     ) : this(
         storage = DatabaseApiMockStorage(database.apiMockDao()),
         parser = parser,
+        idGenerator = idGenerator,
         coroutineScope = coroutineScope,
     )
 
-    public override fun add(mock: ApiMock<Request, Matcher, Response>) {
+    public override fun add(
+        response: Response,
+        matcher: Matcher
+    ) {
+        val mock = BaseApiMock(
+            id = idGenerator.generateId(matcher = matcher, response = response),
+            matcher = matcher,
+            response = response,
+        )
         val record = encode(mock)
 
         storage.add(record)
     }
 
-    override fun remove(mock: ApiMock<Request, Matcher, Response>): Boolean {
-        val matcher = parser.encodeMatcher(mock.matcher)
-        val response = parser.encodeResponse(mock.response)
-
-        return storage.remove(
-            response = response,
-            matcher = matcher,
-        )
+    public override fun remove(id: Id): Boolean {
+        return storage.remove(id.toString())
     }
 
     public override fun clear() {
         storage.clear()
     }
 
-    public override fun find(request: Request): ApiMock<Request, Matcher, Response>? = runBlocking {
-        val mocks = storage.observeAll()
-            .map { it.map(parser::decodeRecord) }
-            .first()
+    public override fun find(request: Request): ApiMock<Request, Matcher, Response, Id>? =
+        runBlocking {
+            val mocks = storage.observeAll()
+                .map { it.map(parser::decodeRecord) }
+                .first()
 
-        mocks.firstOrNull { mock -> mock.matcher.matches(request) }
-    }
+            mocks.firstOrNull { mock -> mock.matcher.matches(request) }
+        }
 
-    private fun encode(mock: ApiMock<Request, Matcher, Response>): RoomApiMockRecord =
+    private fun encode(mock: ApiMock<Request, Matcher, Response, Id>): RoomApiMockRecord =
         RoomApiMockRecord(
-            id = mock.hashCode().toString(),
+            id = mock.id.toString(),
             matcher = parser.encodeMatcher(mock.matcher),
             response = parser.encodeResponse(mock.response),
         )

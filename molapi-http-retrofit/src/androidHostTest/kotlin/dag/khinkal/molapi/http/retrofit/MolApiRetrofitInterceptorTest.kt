@@ -1,11 +1,11 @@
 package dag.khinkal.molapi.http.retrofit
 
+import dag.khinkal.molapi.http.dsl.get
+import dag.khinkal.molapi.http.dsl.post
 import dag.khinkal.molapi.http.gson.util.GsonHttpResponse
-import dag.khinkal.molapi.http.matcher.BaseHttpRequestMatcher
-import dag.khinkal.molapi.http.model.BaseHttpApiMock
 import dag.khinkal.molapi.http.model.Headers
-import dag.khinkal.molapi.http.model.HttpMethod
 import dag.khinkal.molapi.http.model.JsonBody
+import dag.khinkal.molapi.http.registry.HttpInMemoryApiMockRegistry
 import dag.khinkal.molapi.http.retrofit.interceptor.addMolApiInterceptor
 import mockwebserver3.MockResponse
 import mockwebserver3.MockWebServer
@@ -23,22 +23,15 @@ class MolApiRetrofitInterceptorTest {
 
     @Test
     fun returnsMockResponseWhenRegistryFindsMatch() {
-        val registry = dag.khinkal.molapi.http.registry.HttpApiMockRegistry().apply {
-            add(
-                BaseHttpApiMock(
-                    url = "task_mock",
-                    matcher = BaseHttpRequestMatcher(
-                        urlRegex = "https://some.com/tasks/42",
-                        method = HttpMethod.GET,
+        val registry = HttpInMemoryApiMockRegistry().apply {
+            get("https://some.com/tasks/42") {
+                GsonHttpResponse(
+                    headers = Headers(
+                        mapOf("Content-Type" to setOf("application/json")),
                     ),
-                    response = GsonHttpResponse(
-                        headers = Headers(
-                            mapOf("Content-Type" to setOf("application/json")),
-                        ),
-                        body = TestTask(id = 42, title = "from molapi"),
-                    ),
-                ),
-            )
+                    body = TestTask(id = 42, title = "from molapi"),
+                )
+            }
         }
         val service = createService(
             baseUrl = "https://some.com/",
@@ -60,7 +53,7 @@ class MolApiRetrofitInterceptorTest {
             val service = createService(
                 baseUrl = server.url("/").toString(),
                 client = OkHttpClient.Builder()
-                    .addMolApiInterceptor(dag.khinkal.molapi.http.registry.HttpApiMockRegistry())
+                    .addMolApiInterceptor(HttpInMemoryApiMockRegistry())
                     .build(),
             )
 
@@ -74,23 +67,18 @@ class MolApiRetrofitInterceptorTest {
 
     @Test
     fun matchesRequestBodyWhenRetrofitRequestHasJsonBody() {
-        val registry = dag.khinkal.molapi.http.registry.HttpApiMockRegistry().apply {
-            add(
-                BaseHttpApiMock(
-                    url = "create_task_mock",
-                    matcher = BaseHttpRequestMatcher(
-                        urlRegex = "https://some.com/tasks",
-                        method = HttpMethod.POST,
-                        body = JsonBody("""{"title":"new"}"""),
+        val registry = HttpInMemoryApiMockRegistry().apply {
+            post(
+                url = "https://some.com/tasks",
+                body = JsonBody("""{"title":"new"}"""),
+            ) {
+                GsonHttpResponse(
+                    headers = Headers(
+                        mapOf("Content-Type" to setOf("application/json")),
                     ),
-                    response = GsonHttpResponse(
-                        headers = Headers(
-                            mapOf("Content-Type" to setOf("application/json")),
-                        ),
-                        body = TestTask(id = 9, title = "new"),
-                    ),
-                ),
-            )
+                    body = TestTask(id = 9, title = "new"),
+                )
+            }
         }
         val service = createService(
             baseUrl = "https://some.com/",

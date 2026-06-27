@@ -8,7 +8,8 @@ import dag.khinkal.molapi.core.model.ApiResponse
 public interface ApiMockParser<
         Request : ApiRequest,
         Matcher : ApiRequestMatcher<Request>,
-        Response : ApiResponse
+        Response : ApiResponse,
+        Id : Any,
         > {
 
     public fun encodeMatcher(matcher: Matcher): String
@@ -19,5 +20,5 @@ public interface ApiMockParser<
 
     public fun decodeResponse(response: String): Response
 
-    public fun decodeRecord(record: RoomApiMockRecord): ApiMock<Request, Matcher, Response>
+    public fun decodeRecord(record: RoomApiMockRecord): ApiMock<Request, Matcher, Response, Id>
 }

@@ -14,7 +14,8 @@ public class MolApiRetrofitInterceptor(
     private val registry: ReadApiMockRegistry<
             HttpRequest,
             ApiRequestMatcher<HttpRequest>,
-            HttpResponse
+            HttpResponse,
+            *,
             >,
 ) : Interceptor {
 
@@ -32,6 +33,7 @@ public fun OkHttpClient.Builder.addMolApiInterceptor(
     registry: ReadApiMockRegistry<
             HttpRequest,
             ApiRequestMatcher<HttpRequest>,
-            HttpResponse
+            HttpResponse,
+            *,
             >,
 ): OkHttpClient.Builder = addInterceptor(MolApiRetrofitInterceptor(registry))

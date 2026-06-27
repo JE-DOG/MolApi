@@ -1,5 +1,6 @@
 package dag.khinkal.molapi.http
 
+import dag.khinkal.molapi.core.registry.add
 import dag.khinkal.molapi.http.matcher.BaseHttpRequestMatcher
 import dag.khinkal.molapi.http.model.BaseHttpApiMock
 import dag.khinkal.molapi.http.model.Headers
@@ -7,21 +8,23 @@ import dag.khinkal.molapi.http.model.HttpMethod
 import dag.khinkal.molapi.http.model.HttpRequest
 import dag.khinkal.molapi.http.model.HttpResponse
 import dag.khinkal.molapi.http.model.JsonBody
+import dag.khinkal.molapi.http.registry.HttpInMemoryApiMockRegistry
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class HttpMockRegistryUsageTest {
 
     @Test
-    fun baseHttpApiMockExposesUrl() {
-        val url = "https://some.com/tasks"
+    fun baseHttpApiMockGeneratesIdFromMatcherAndResponse() {
+        val matcher = BaseHttpRequestMatcher(url = "https://some.com/tasks")
+        val response = HttpResponse()
+
         val mock = BaseHttpApiMock(
-            url = url,
-            matcher = BaseHttpRequestMatcher(urlRegex = url),
-            response = HttpResponse(),
+            matcher = matcher,
+            response = response,
         )
 
-        assertEquals(url, mock.url)
+        assertEquals(BaseHttpApiMock(matcher = matcher, response = response).id, mock.id)
     }
 
     @Test
@@ -40,15 +43,14 @@ class HttpMockRegistryUsageTest {
         )
 
         val mock = BaseHttpApiMock(
-            url = "https://some.com/tasks",
             matcher = BaseHttpRequestMatcher(
-                urlRegex = "https://some.com/tasks",
-                method = HttpMethod.GET
+                url = "https://some.com/tasks",
+                method = HttpMethod.GET,
             ),
-            response = response
+            response = response,
         )
 
-        val registry = dag.khinkal.molapi.http.registry.HttpApiMockRegistry()
+        val registry = HttpInMemoryApiMockRegistry()
 
         registry.add(mock)
 

@@ -6,5 +6,6 @@ import dag.khinkal.molapi.core.model.ApiMock
 public interface HttpApiMock : ApiMock<
         HttpRequest,
         ApiRequestMatcher<HttpRequest>,
-        HttpResponse
+        HttpResponse,
+        Any,
         >

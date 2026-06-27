@@ -8,7 +8,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dag.khinkal.molapi.core.matcher.ApiRequestMatcher
 import dag.khinkal.molapi.core.model.ApiMock
 import dag.khinkal.molapi.http.matcher.BaseHttpRequestMatcher
-import dag.khinkal.molapi.http.model.BaseHttpApiMock
 import dag.khinkal.molapi.http.model.Headers
 import dag.khinkal.molapi.http.model.HttpBody
 import dag.khinkal.molapi.http.model.HttpMethod
@@ -18,6 +17,7 @@ import dag.khinkal.molapi.http.model.JsonBody
 import dag.khinkal.molapi.http.registry.HttpApiMockRegistry
 
 internal data class HttpMockEditorMock(
+    val id: Any,
     val url: String?,
     val method: HttpMethod?,
     val requestHeaders: String?,
@@ -64,7 +64,7 @@ internal class HttpMockEditorState(
     }
 
     private fun filterMocks(
-        mocks: List<ApiMock<HttpRequest, ApiRequestMatcher<HttpRequest>, HttpResponse>>,
+        mocks: List<ApiMock<HttpRequest, ApiRequestMatcher<HttpRequest>, HttpResponse, *>>,
     ): List<HttpMockEditorMock> {
         val queryTokens = searchQuery
             .trim()
@@ -84,38 +84,7 @@ internal class HttpMockEditorState(
     fun removeMock(
         mock: HttpMockEditorMock,
     ): Boolean {
-        val matcherHeaders = if (mock.requestHeaders.isNullOrBlank()) {
-            null
-        } else {
-            parseHeaders(draftMatcherHeaders) ?: return false
-        }
-        val responseHeaders = if (mock.responseHeaders.isNullOrBlank()) {
-            null
-        } else {
-            parseHeaders(draftResponseHeaders) ?: return false
-        }
-        val requestBody =
-            mock.requestBody?.trim()
-                .takeIf { body -> !body.isNullOrBlank() }
-                ?.let(::JsonBody)
-        val responseBody = mock.responseBody
-            .takeIf { body -> !body.isNullOrBlank() }
-            ?.let(::JsonBody)
-        val mock = BaseHttpApiMock(
-            matcher = BaseHttpRequestMatcher(
-                url = mock.url?.trim().takeIf { url -> !url.isNullOrBlank() },
-                method = mock.method,
-                body = requestBody,
-                headers = matcherHeaders,
-            ),
-            response = HttpResponse(
-                body = responseBody,
-                headers = responseHeaders,
-                statusCode = mock.statusCode,
-            ),
-        )
-
-        return registry.remove(mock)
+        return registry.remove(mock.id)
     }
 
     fun clearMocks() {
@@ -145,7 +114,7 @@ internal class HttpMockEditorState(
         val responseBody = draftResponseBody
             .takeIf { body -> body.isNotBlank() }
             ?.let(::JsonBody)
-        val mock = BaseHttpApiMock(
+        registry.add(
             matcher = BaseHttpRequestMatcher(
                 url = draftMatcherUrl.trim().takeIf { url -> url.isNotEmpty() },
                 method = draftMatcherMethod,
@@ -158,8 +127,6 @@ internal class HttpMockEditorState(
                 statusCode = statusCode,
             ),
         )
-
-        registry.add(mock)
         resetDraft()
         return true
     }
@@ -203,10 +170,12 @@ internal class HttpMockEditorState(
     }
 }
 
-private fun ApiMock<HttpRequest, *, HttpResponse>.toEditorMock(): HttpMockEditorMock {
+private fun ApiMock<HttpRequest, *, HttpResponse, *>.toEditorMock(): HttpMockEditorMock {
     val baseMatcher = matcher as? BaseHttpRequestMatcher
     val httpResponse = response
+
     return HttpMockEditorMock(
+        id = id,
         url = baseMatcher?.url,
         method = baseMatcher?.method,
         requestHeaders = baseMatcher?.headers.asText(),

@@ -1,5 +1,6 @@
 package dag.khinkal.molapi
 
+import dag.khinkal.molapi.core.idgenerator.impl.HashCodeApiMockIdGenerator
 import dag.khinkal.molapi.core.matcher.ApiRequestMatcher
 import dag.khinkal.molapi.core.model.ApiMock
 import dag.khinkal.molapi.http.matcher.BaseHttpRequestMatcher
@@ -25,6 +26,7 @@ internal fun createRoomHttpMockRegistry(
     RoomApiMockRegistry(
         database = database,
         parser = HttpRoomApiMockParser,
+        idGenerator = HashCodeApiMockIdGenerator(),
         coroutineScope = coroutineScope,
     )
 
@@ -32,6 +34,7 @@ private object HttpRoomApiMockParser : ApiMockParser<
         HttpRequest,
         ApiRequestMatcher<HttpRequest>,
         HttpResponse,
+        Any,
         > {
 
     override fun encodeMatcher(matcher: ApiRequestMatcher<HttpRequest>): String {
@@ -76,10 +79,11 @@ private object HttpRoomApiMockParser : ApiMockParser<
 
     override fun decodeRecord(
         record: RoomApiMockRecord,
-    ): ApiMock<HttpRequest, ApiRequestMatcher<HttpRequest>, HttpResponse> {
+    ): ApiMock<HttpRequest, ApiRequestMatcher<HttpRequest>, HttpResponse, Any> {
         val matcher = decodeMatcher(record.matcher)
 
         return BaseHttpApiMock(
+            id = record.id.toInt(),
             matcher = matcher,
             response = decodeResponse(record.response),
         )

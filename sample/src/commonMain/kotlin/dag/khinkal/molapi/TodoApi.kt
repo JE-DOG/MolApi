@@ -1,8 +1,9 @@
 package dag.khinkal.molapi
 
-import dag.khinkal.molapi.core.registry.impl.InMemoryApiMockRegistry
 import dag.khinkal.molapi.http.ktor.plugin.MolApiKtorPlugin
 import dag.khinkal.molapi.http.registry.HttpApiMockRegistry
+import dag.khinkal.molapi.http.registry.HttpInMemoryApiMockRegistry
+import dev.skymansandy.wiretap.plugin.http.WiretapKtorHttpPlugin
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
@@ -36,7 +37,7 @@ public class TodoApi(
 
 public data class MolApiClientConfig(
     public val isEnabled: Boolean = true,
-    public val registry: HttpApiMockRegistry = InMemoryApiMockRegistry(),
+    public val registry: HttpApiMockRegistry = HttpInMemoryApiMockRegistry(),
 )
 
 public fun createTodoHttpClient(
@@ -48,7 +49,7 @@ public fun createTodoHttpClient(
                 registry = molApiConfig.registry
             }
         }
-//        install(WiretapKtorHttpPlugin)
+        install(WiretapKtorHttpPlugin)
         install(ContentNegotiation) {
             json(AppJson)
         }

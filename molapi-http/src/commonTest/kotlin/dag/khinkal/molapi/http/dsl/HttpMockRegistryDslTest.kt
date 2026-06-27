@@ -1,13 +1,12 @@
 package dag.khinkal.molapi.http.dsl
 
-import dag.khinkal.molapi.core.matcher.ApiRequestMatcher
-import dag.khinkal.molapi.core.registry.impl.InMemoryApiMockRegistry
 import dag.khinkal.molapi.http.model.Headers
 import dag.khinkal.molapi.http.model.HttpBody
 import dag.khinkal.molapi.http.model.HttpMethod
 import dag.khinkal.molapi.http.model.HttpRequest
 import dag.khinkal.molapi.http.model.HttpResponse
 import dag.khinkal.molapi.http.model.JsonBody
+import dag.khinkal.molapi.http.registry.HttpInMemoryApiMockRegistry
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
@@ -128,17 +127,9 @@ class HttpMockRegistryDslTest {
         assertEquals(206, response.statusCode)
     }
 
-    private fun testRegistry(): InMemoryApiMockRegistry<
-            HttpRequest,
-            ApiRequestMatcher<HttpRequest>,
-            HttpResponse,
-            > = InMemoryApiMockRegistry()
+    private fun testRegistry(): HttpInMemoryApiMockRegistry = HttpInMemoryApiMockRegistry()
 
-    private fun InMemoryApiMockRegistry<
-            HttpRequest,
-            ApiRequestMatcher<HttpRequest>,
-            HttpResponse,
-            >.responseFor(
+    private fun HttpInMemoryApiMockRegistry.responseFor(
         method: HttpMethod,
         url: String,
         headers: Headers? = null,

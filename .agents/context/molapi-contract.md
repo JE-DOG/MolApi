@@ -27,23 +27,31 @@ Package: `dag.khinkal.molapi.core`
 - `interface ApiRequestMatcher<AR : ApiRequest> { fun matches(request: AR): Boolean }`
 -
 
-`interface ApiMock<Request : ApiRequest, Matcher : ApiRequestMatcher<Request>, Response : ApiResponse>`
+`interface ApiMock<Request : ApiRequest, Matcher : ApiRequestMatcher<Request>, Response : ApiResponse, Id : Any>`
 -
-`data class BaseApiMock<Request : ApiRequest, Matcher : ApiRequestMatcher<Request>, Response : ApiResponse>`
+`data class BaseApiMock<Request : ApiRequest, Matcher : ApiRequestMatcher<Request>, Response : ApiResponse, Id : Any>`
 -
-`interface ReadApiMockRegistry<Request : ApiRequest, Matcher : ApiRequestMatcher<Request>, Response : ApiResponse>`
+`interface ApiMockIdGenerator<Matcher : ApiRequestMatcher<*>, Response : ApiResponse, Id : Any>`
 -
-`interface ApiMockRegistry<Request : ApiRequest, Matcher : ApiRequestMatcher<Request>, Response : ApiResponse>`
+`class HashCodeApiMockIdGenerator<Matcher : ApiRequestMatcher<*>, Response : ApiResponse>`
 -
-`class InMemoryApiMockRegistry<Request : ApiRequest, Matcher : ApiRequestMatcher<Request>, Response : ApiResponse>`
+`interface ReadApiMockRegistry<Request : ApiRequest, Matcher : ApiRequestMatcher<Request>, Response : ApiResponse, Id : Any>`
+-
+`interface ApiMockRegistry<Request : ApiRequest, Matcher : ApiRequestMatcher<Request>, Response : ApiResponse, Id : Any>`
+-
+`class InMemoryApiMockRegistry<Request : ApiRequest, Matcher : ApiRequestMatcher<Request>, Response : ApiResponse, Id : Any>`
 
 Критичные детали:
 
 - `ApiRequestMatcher` использует метод `matches`, не `match`.
-- `ApiMock.id` имеет тип `Any`.
-- `ReadApiMockRegistry.find(request)` возвращает `ApiMock<Request, Matcher, Response>?`.
-- `ApiMockRegistry.add` принимает `ApiMock<Request, Matcher, Response>`.
-- `remove(id: Any): Boolean` удаляет все mocks с таким id и возвращает `true`, если удалено хотя бы
+- `ApiMock.id` имеет тип `Id : Any`.
+- `ApiMockIdGenerator.generateId(matcher, response)` формирует id только из `matcher` и `response`;
+  текущее значение `ApiMock.id` в генерации не участвует.
+- `ReadApiMockRegistry.find(request)` возвращает `ApiMock<Request, Matcher, Response, Id>?`.
+- Основной `ApiMockRegistry.add(response, matcher)` сам формирует id.
+- Extension `ApiMockRegistry.add(mock)` передает в основной `add` только `mock.response` и
+  `mock.matcher`; id входного mock не используется.
+- `remove(id: Id): Boolean` удаляет все mocks с таким id и возвращает `true`, если удалено хотя бы
   одно.
 - `clear()` ничего не возвращает.
 - `find` возвращает первый mock, для которого `mock.matcher.matches(request) == true`.
@@ -68,12 +76,14 @@ Package: `dag.khinkal.molapi.http`
 -
 `data class HttpResponse(val headers: Headers?, val body: HttpBody, val statusCode: Int = 200) : ApiResponse`
 
-- `interface HttpApiMock : ApiMock<HttpRequest, ApiRequestMatcher<HttpRequest>, HttpResponse>`
+- `interface HttpApiMock : ApiMock<HttpRequest, ApiRequestMatcher<HttpRequest>, HttpResponse, Any>`
 - `open class BaseHttpRequestMatcher(...) : ApiRequestMatcher<HttpRequest>`
 - `data class BaseHttpApiMock(...) : HttpApiMock`
 -
 
-`typealias HttpMockRegistry = InMemoryApiMockRegistry<HttpRequest, ApiRequestMatcher<HttpRequest>, HttpResponse>`
+`typealias HttpApiMockRegistry = ApiMockRegistry<HttpRequest, ApiRequestMatcher<HttpRequest>, HttpResponse, Any>`
+-
+`class HttpInMemoryApiMockRegistry : InMemoryApiMockRegistry<HttpRequest, ApiRequestMatcher<HttpRequest>, HttpResponse, Any>`
 
 `BaseHttpRequestMatcher`:
 
@@ -111,7 +121,7 @@ Package: `dag.khinkal.molapi.http.ktor`
 - `HttpResponse.toKtorHttpClientCall(...)` преобразует `dag.khinkal.molapi.http.HttpResponse`
   в Ktor `HttpClientCall`.
 - `MolApiKtorPlugin` принимает
-  `ReadApiMockRegistry<HttpRequest, ApiRequestMatcher<HttpRequest>, HttpResponse>`.
+  `ReadApiMockRegistry<HttpRequest, ApiRequestMatcher<HttpRequest>, HttpResponse, Any>`.
 - Plugin работает на Ktor `Send` hook: если registry находит mock, возвращается mock response;
   если mock не найден или метод request не поддержан текущей HTTP-моделью, запрос идет дальше
   как реальный Ktor request.
