@@ -86,7 +86,9 @@ class TodoApiTest {
             mock: ApiMock<HttpRequest, ApiRequestMatcher<HttpRequest>, HttpResponse>,
         ) = Unit
 
-        override fun remove(id: Any): Boolean = false
+        override fun remove(mock: ApiMock<HttpRequest, ApiRequestMatcher<HttpRequest>, HttpResponse>): Boolean {
+            return true
+        }
 
         override fun clear() = Unit
 
