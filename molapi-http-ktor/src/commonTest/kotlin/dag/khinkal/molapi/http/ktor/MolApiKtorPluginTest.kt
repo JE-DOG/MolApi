@@ -1,6 +1,7 @@
 package dag.khinkal.molapi.http.ktor
 
 import dag.khinkal.molapi.http.dsl.get
+import dag.khinkal.molapi.http.dsl.head
 import dag.khinkal.molapi.http.dsl.post
 import dag.khinkal.molapi.http.ktor.plugin.MolApiKtorPlugin
 import dag.khinkal.molapi.http.model.Headers
@@ -10,11 +11,15 @@ import dag.khinkal.molapi.http.registry.HttpInMemoryApiMockRegistry
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
 import io.ktor.client.engine.mock.respond
+import io.ktor.client.plugins.observer.ResponseObserver
 import io.ktor.client.request.get
+import io.ktor.client.request.head
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.HttpStatusCode
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -49,6 +54,69 @@ class MolApiKtorPluginTest {
         assertEquals(201, response.status.value)
         assertEquals("""{"tasks":[]}""", response.bodyAsText())
         assertEquals(0, realRequestCount)
+
+        client.close()
+    }
+
+    @Test
+    fun returnsMockResponseForHeadRequest() = runTest {
+        var realRequestCount = 0
+        val registry = HttpInMemoryApiMockRegistry().apply {
+            head("https://some.com/tasks") {
+                HttpResponse(statusCode = 204)
+            }
+        }
+        val client = HttpClient(
+            MockEngine {
+                realRequestCount += 1
+                respond("real")
+            }
+        ) {
+            install(MolApiKtorPlugin) {
+                this.registry = registry
+            }
+        }
+
+        val response = client.head("https://some.com/tasks")
+
+        assertEquals(204, response.status.value)
+        assertEquals(0, realRequestCount)
+
+        client.close()
+    }
+
+    @Test
+    @OptIn(ExperimentalCoroutinesApi::class)
+    fun mockedResponsePassesThroughReceivePipeline() = runTest {
+        var observedStatusCode: Int? = null
+        val registry = HttpInMemoryApiMockRegistry().apply {
+            get("https://some.com/tasks") {
+                HttpResponse(
+                    body = JsonBody("""{"tasks":[]}"""),
+                    statusCode = 203,
+                )
+            }
+        }
+        val client = HttpClient(
+            MockEngine {
+                respond("real")
+            }
+        ) {
+            install(MolApiKtorPlugin) {
+                this.registry = registry
+            }
+            install(ResponseObserver) {
+                onResponse { response ->
+                    observedStatusCode = response.status.value
+                }
+            }
+        }
+
+        val response = client.get("https://some.com/tasks")
+
+        assertEquals("""{"tasks":[]}""", response.bodyAsText())
+        advanceUntilIdle()
+        assertEquals(203, observedStatusCode)
 
         client.close()
     }

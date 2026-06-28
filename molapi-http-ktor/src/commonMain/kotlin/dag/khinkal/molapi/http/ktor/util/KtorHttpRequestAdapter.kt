@@ -26,6 +26,7 @@ private fun KtorHttpMethod.toMolApiMethodOrNull(): HttpMethod? = when (this) {
     KtorHttpMethod.Post -> HttpMethod.POST
     KtorHttpMethod.Put -> HttpMethod.PUT
     KtorHttpMethod.Patch -> HttpMethod.PATCH
+    KtorHttpMethod.Head -> HttpMethod.HEAD
     KtorHttpMethod.Delete -> HttpMethod.DELETE
     else -> null
 }

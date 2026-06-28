@@ -12,6 +12,7 @@ import io.ktor.http.HttpHeaders
 import io.ktor.http.contentType
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import io.ktor.http.HttpMethod as KtorHttpMethod
 
 class KtorHttpRequestAdapterTest {
 
@@ -19,7 +20,7 @@ class KtorHttpRequestAdapterTest {
     fun mapsSupportedKtorRequestToMolApiRequest() {
         val builder = HttpRequestBuilder().apply {
             url("https://some.com/tasks")
-            method = io.ktor.http.HttpMethod.Post
+            method = HttpMethod.Post
             contentType(ContentType.Application.Json)
             headers {
                 append(HttpHeaders.Accept, "application/json")
@@ -39,9 +40,21 @@ class KtorHttpRequestAdapterTest {
     fun returnsNullForUnsupportedKtorMethod() {
         val builder = HttpRequestBuilder().apply {
             url("https://some.com/tasks")
-            method = io.ktor.http.HttpMethod.Options
+            method = KtorHttpMethod.Options
         }
 
         assertEquals(null, builder.toMolApiHttpRequestOrNull())
+    }
+
+    @Test
+    fun mapsHeadMethod() {
+        val builder = HttpRequestBuilder().apply {
+            url("https://some.com/tasks")
+            method = KtorHttpMethod.Head
+        }
+
+        val request = builder.toMolApiHttpRequestOrNull()
+
+        assertEquals(HttpMethod.HEAD, request?.method)
     }
 }
