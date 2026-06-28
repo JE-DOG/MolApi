@@ -12,20 +12,20 @@ Android-only adapters where the underlying stack is Android/JVM-only.
 
 ## Modules
 
-| Module                        | Purpose                                                                        | Targets      |
-|-------------------------------|--------------------------------------------------------------------------------|--------------|
-| `:molapi-core`                | Generic request, matcher, response and registry contracts.                     | Android, iOS |
-| `:molapi-http`                | HTTP request/response model, matchers, in-memory registry aliases and DSL.     | Android, iOS |
-| `:molapi-http-ktor`           | Ktor Client plugin that returns a mock response before a real request is sent. | Android, iOS |
-| `:molapi-http-serialization`  | `kotlinx.serialization` helpers for JSON HTTP bodies.                          | Android, iOS |
-| `:molapi-room`                | Room-backed persistent registry foundation.                                    | Android, iOS |
-| `:molapi-http-editor`         | Compose Multiplatform screen for viewing, searching and editing HTTP mocks.    | Android, iOS |
-| `:molapi-http-android-assets` | Helps create JSON HTTP bodies from Android project assets.                     | Android      |
-| `:molapi-http-gson`           | Gson helpers for JSON HTTP bodies.                                             | Android      |
-| `:molapi-http-retrofit`       | OkHttp/Retrofit interceptor integration.                                       | Android      |
-| `:sample`                     | Shared sample app code.                                                        | Android, iOS |
-| `:sampleAndroidApp`           | Android sample application entry point.                                        | Android      |
-| `SampleIosApp/`               | iOS sample application entry point.                                            | iOS          |
+| Module                                           | Purpose                                                                        | Targets      |
+|--------------------------------------------------|--------------------------------------------------------------------------------|--------------|
+| `:molapi-core`                                   | Generic request, matcher, response and registry contracts.                     | Android, iOS |
+| [`:molapi-http`](#http-mocking)                  | HTTP request/response model, matchers, in-memory registry aliases and DSL.     | Android, iOS |
+| [`:molapi-http-ktor`](#ktor-client)              | Ktor Client plugin that returns a mock response before a real request is sent. | Android, iOS |
+| [`:molapi-http-serialization`](#json-helpers)    | `kotlinx.serialization` helpers for JSON HTTP bodies.                          | Android, iOS |
+| [`:molapi-room`](#persistent-registry)           | Room-backed persistent registry foundation.                                    | Android, iOS |
+| [`:molapi-http-editor`](#editor-ui)              | Compose Multiplatform screen for viewing, searching and editing HTTP mocks.    | Android, iOS |
+| [`:molapi-http-android-assets`](#android-assets) | Helps create JSON HTTP bodies from Android project assets.                     | Android      |
+| [`:molapi-http-gson`](#json-helpers)             | Gson helpers for JSON HTTP bodies.                                             | Android      |
+| [`:molapi-http-retrofit`](#retrofit-and-okhttp)  | OkHttp/Retrofit interceptor integration.                                       | Android      |
+| `:sample`                                        | Shared sample app code.                                                        | Android, iOS |
+| `:sampleAndroidApp`                              | Android sample application entry point.                                        | Android      |
+| `SampleIosApp/`                                  | iOS sample application entry point.                                            | iOS          |
 
 ## HTTP Mocking
 
