@@ -32,6 +32,10 @@ import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 import dag.khinkal.molapi.http.model.HttpMethod
 import dag.khinkal.molapi.http.registry.HttpApiMockRegistry
+import molapi.molapi_http_editor.generated.resources.Res
+import molapi.molapi_http_editor.generated.resources.*
+import org.jetbrains.compose.resources.StringResource
+import org.jetbrains.compose.resources.stringResource
 
 private sealed interface HttpMockEditorRoute : NavKey
 
@@ -150,12 +154,12 @@ private fun Header(
     ) {
         Column {
             Text(
-                text = "HTTP mocks",
+                text = stringResource(Res.string.http_mocks_title),
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.SemiBold,
             )
             Text(
-                text = "$mocksCount visible",
+                text = stringResource(Res.string.visible_mocks_count, mocksCount),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -164,10 +168,10 @@ private fun Header(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             Button(onClick = onCreateMockClick) {
-                Text("Add mock")
+                Text(stringResource(Res.string.add_mock_button))
             }
             OutlinedButton(onClick = onClearClick) {
-                Text("Clear")
+                Text(stringResource(Res.string.clear_button))
             }
         }
     }
@@ -180,7 +184,7 @@ private fun SearchField(state: HttpMockEditorState) {
         onValueChange = { value -> state.searchQuery = value },
         modifier = Modifier.fillMaxWidth(),
         singleLine = true,
-        label = { Text("Find mocks") },
+        label = { Text(stringResource(Res.string.find_mocks_label)) },
     )
 }
 
@@ -206,12 +210,12 @@ private fun CreateMockScreen(
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
                 Text(
-                    text = "Create mock",
+                    text = stringResource(Res.string.create_mock_title),
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.SemiBold,
                 )
                 TextButton(onClick = onBackClick) {
-                    Text("Back")
+                    Text(stringResource(Res.string.back_button))
                 }
             }
 
@@ -220,7 +224,7 @@ private fun CreateMockScreen(
             DraftResponseFields(state)
             state.draftError?.let { error ->
                 Text(
-                    text = error,
+                    text = error.asText(),
                     color = MaterialTheme.colorScheme.error,
                     style = MaterialTheme.typography.bodySmall,
                 )
@@ -232,7 +236,7 @@ private fun CreateMockScreen(
                     }
                 },
             ) {
-                Text("Add mock")
+                Text(stringResource(Res.string.add_mock_button))
             }
         }
     }
@@ -244,13 +248,13 @@ private fun DraftMatcherFields(state: HttpMockEditorState) {
         modifier = Modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
-        SectionTitle("Request matchers")
+        SectionTitle(stringResource(Res.string.request_matchers_title))
         OutlinedTextField(
             value = state.draftMatcherUrl,
             onValueChange = { value -> state.draftMatcherUrl = value },
             modifier = Modifier.fillMaxWidth(),
             singleLine = true,
-            label = { Text("Matcher URL") },
+            label = { Text(stringResource(Res.string.matcher_url_label)) },
         )
         MethodPicker(
             selectedMethod = state.draftMatcherMethod,
@@ -261,14 +265,14 @@ private fun DraftMatcherFields(state: HttpMockEditorState) {
             onValueChange = { value -> state.draftMatcherHeaders = value },
             modifier = Modifier.fillMaxWidth(),
             minLines = 2,
-            label = { Text("Matcher headers") },
+            label = { Text(stringResource(Res.string.matcher_headers_label)) },
         )
         OutlinedTextField(
             value = state.draftMatcherBody,
             onValueChange = { value -> state.draftMatcherBody = value },
             modifier = Modifier.fillMaxWidth(),
             minLines = 2,
-            label = { Text("Matcher JSON body") },
+            label = { Text(stringResource(Res.string.matcher_body_label)) },
         )
     }
 }
@@ -279,27 +283,27 @@ private fun DraftResponseFields(state: HttpMockEditorState) {
         modifier = Modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
-        SectionTitle("Mock response")
+        SectionTitle(stringResource(Res.string.mock_response_title))
         OutlinedTextField(
             value = state.draftResponseStatusCode,
             onValueChange = { value -> state.draftResponseStatusCode = value },
             modifier = Modifier.fillMaxWidth(),
             singleLine = true,
-            label = { Text("Response status code") },
+            label = { Text(stringResource(Res.string.response_status_code_label)) },
         )
         OutlinedTextField(
             value = state.draftResponseHeaders,
             onValueChange = { value -> state.draftResponseHeaders = value },
             modifier = Modifier.fillMaxWidth(),
             minLines = 2,
-            label = { Text("Response headers") },
+            label = { Text(stringResource(Res.string.response_headers_label)) },
         )
         OutlinedTextField(
             value = state.draftResponseBody,
             onValueChange = { value -> state.draftResponseBody = value },
             modifier = Modifier.fillMaxWidth(),
             minLines = 2,
-            label = { Text("Response JSON body") },
+            label = { Text(stringResource(Res.string.response_body_label)) },
         )
     }
 }
@@ -323,7 +327,7 @@ private fun MethodPicker(
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         Text(
-            text = "HTTP method",
+            text = stringResource(Res.string.http_method_label),
             style = MaterialTheme.typography.labelLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
@@ -334,11 +338,11 @@ private fun MethodPicker(
         ) {
             if (selectedMethod == null) {
                 Button(onClick = { onMethodSelected(null) }) {
-                    Text("ANY")
+                    Text(stringResource(Res.string.any_method_button))
                 }
             } else {
                 OutlinedButton(onClick = { onMethodSelected(null) }) {
-                    Text("ANY")
+                    Text(stringResource(Res.string.any_method_button))
                 }
             }
             HttpMethod.entries.forEach { method ->
@@ -377,18 +381,21 @@ private fun MockRow(
                 verticalArrangement = Arrangement.spacedBy(2.dp),
             ) {
                 Text(
-                    text = listOfNotNull(mock.method?.name ?: "ANY", mock.url)
+                    text = listOfNotNull(
+                        mock.method?.name ?: stringResource(Res.string.any_method_button),
+                        mock.url,
+                    )
                         .joinToString(" "),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
             TextButton(onClick = onDeleteClick) {
-                Text("Delete")
+                Text(stringResource(Res.string.delete_button))
             }
         }
         Text(
-            text = "Status ${mock.statusCode}",
+            text = stringResource(Res.string.status_code_label, mock.statusCode),
             style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.primary,
         )
@@ -397,7 +404,15 @@ private fun MockRow(
             TextButton(
                 onClick = { isContentExpanded = !isContentExpanded },
             ) {
-                Text(if (isContentExpanded) "Collapse content" else "Expand content")
+                Text(
+                    stringResource(
+                        if (isContentExpanded) {
+                            Res.string.collapse_content_button
+                        } else {
+                            Res.string.expand_content_button
+                        },
+                    ),
+                )
             }
             SelectionContainer {
                 Column(
@@ -431,7 +446,7 @@ private fun MockContentSection(
         verticalArrangement = Arrangement.spacedBy(4.dp),
     ) {
         Text(
-            text = section.title,
+            text = stringResource(section.title),
             style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.primary,
         )
@@ -444,15 +459,27 @@ private fun MockContentSection(
 }
 
 private data class MockContentSection(
-    val title: String,
+    val title: StringResource,
     val content: String,
 )
+
+@Composable
+private fun HttpMockEditorDraftError.asText(): String = when (this) {
+    HttpMockEditorDraftError.StatusCodeMustBeNumber -> stringResource(
+        Res.string.status_code_number_error,
+    )
+
+    is HttpMockEditorDraftError.InvalidHeaderLine -> stringResource(
+        Res.string.header_line_format_error,
+        lineNumber,
+    )
+}
 
 private fun HttpMockEditorMock.contentSections(): List<MockContentSection> = buildList {
     if (!requestHeaders.isNullOrBlank()) {
         add(
             MockContentSection(
-                title = "Request headers",
+                title = Res.string.request_headers_title,
                 content = requestHeaders,
             ),
         )
@@ -460,7 +487,7 @@ private fun HttpMockEditorMock.contentSections(): List<MockContentSection> = bui
     if (!requestBody.isNullOrBlank()) {
         add(
             MockContentSection(
-                title = "Request body",
+                title = Res.string.request_body_title,
                 content = requestBody,
             ),
         )
@@ -468,7 +495,7 @@ private fun HttpMockEditorMock.contentSections(): List<MockContentSection> = bui
     if (!responseHeaders.isNullOrBlank()) {
         add(
             MockContentSection(
-                title = "Response headers",
+                title = Res.string.response_headers_title,
                 content = responseHeaders,
             ),
         )
@@ -476,7 +503,7 @@ private fun HttpMockEditorMock.contentSections(): List<MockContentSection> = bui
     if (!responseBody.isNullOrBlank()) {
         add(
             MockContentSection(
-                title = "Response body",
+                title = Res.string.response_body_title,
                 content = responseBody,
             ),
         )

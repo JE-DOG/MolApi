@@ -28,6 +28,11 @@ internal data class HttpMockEditorMock(
     val matcherDescription: String,
 )
 
+internal sealed interface HttpMockEditorDraftError {
+    data object StatusCodeMustBeNumber : HttpMockEditorDraftError
+    data class InvalidHeaderLine(val lineNumber: Int) : HttpMockEditorDraftError
+}
+
 internal class HttpMockEditorState(
     private val registry: HttpApiMockRegistry,
 ) {
@@ -48,7 +53,7 @@ internal class HttpMockEditorState(
 
     var draftResponseBody: String by mutableStateOf("")
 
-    var draftError: String? by mutableStateOf(null)
+    var draftError: HttpMockEditorDraftError? by mutableStateOf(null)
         private set
 
     val hasDraftError: Boolean
@@ -95,7 +100,7 @@ internal class HttpMockEditorState(
 
         val statusCode = draftResponseStatusCode.trim().toIntOrNull()
         if (statusCode == null) {
-            draftError = "Status code must be a number"
+            draftError = HttpMockEditorDraftError.StatusCodeMustBeNumber
             return false
         }
 
@@ -150,13 +155,13 @@ internal class HttpMockEditorState(
             .forEachIndexed { index, line ->
                 val separatorIndex = line.indexOf(':')
                 if (separatorIndex <= 0) {
-                    draftError = "Header line ${index + 1} must use Name: value"
+                    draftError = HttpMockEditorDraftError.InvalidHeaderLine(index + 1)
                     return null
                 }
                 val name = line.substring(startIndex = 0, endIndex = separatorIndex).trim()
                 val headerValue = line.substring(startIndex = separatorIndex + 1).trim()
                 if (name.isEmpty() || headerValue.isEmpty()) {
-                    draftError = "Header line ${index + 1} must use Name: value"
+                    draftError = HttpMockEditorDraftError.InvalidHeaderLine(index + 1)
                     return null
                 }
                 headerValues.getOrPut(name) { linkedSetOf() }.add(headerValue)

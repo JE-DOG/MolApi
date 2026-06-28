@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="http_mocks_title">HTTP mocks</string>
+    <string name="visible_mocks_count">%1$d visible</string>
+    <string name="add_mock_button">Add mock</string>
+    <string name="clear_button">Clear</string>
+    <string name="find_mocks_label">Find mocks</string>
+    <string name="create_mock_title">Create mock</string>
+    <string name="back_button">Back</string>
+    <string name="request_matchers_title">Request matchers</string>
+    <string name="matcher_url_label">Matcher URL</string>
+    <string name="http_method_label">HTTP method</string>
+    <string name="any_method_button">ANY</string>
+    <string name="matcher_headers_label">Matcher headers</string>
+    <string name="matcher_body_label">Matcher JSON body</string>
+    <string name="mock_response_title">Mock response</string>
+    <string name="response_status_code_label">Response status code</string>
+    <string name="response_headers_label">Response headers</string>
+    <string name="response_body_label">Response JSON body</string>
+    <string name="delete_button">Delete</string>
+    <string name="status_code_label">Status %1$d</string>
+    <string name="collapse_content_button">Collapse content</string>
+    <string name="expand_content_button">Expand content</string>
+    <string name="request_headers_title">Request headers</string>
+    <string name="request_body_title">Request body</string>
+    <string name="response_headers_title">Response headers</string>
+    <string name="response_body_title">Response body</string>
+    <string name="status_code_number_error">Status code must be a number</string>
+    <string name="header_line_format_error">Header line %1$d must use Name: value</string>
+</resources>
