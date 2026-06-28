@@ -12,19 +12,20 @@ Android-only adapters where the underlying stack is Android/JVM-only.
 
 ## Modules
 
-| Module                       | Purpose                                                                        | Targets      |
-|------------------------------|--------------------------------------------------------------------------------|--------------|
-| `:molapi-core`               | Generic request, matcher, response and registry contracts.                     | Android, iOS |
-| `:molapi-http`               | HTTP request/response model, matchers, in-memory registry aliases and DSL.     | Android, iOS |
-| `:molapi-http-ktor`          | Ktor Client plugin that returns a mock response before a real request is sent. | Android, iOS |
-| `:molapi-http-serialization` | `kotlinx.serialization` helpers for JSON HTTP bodies.                          | Android, iOS |
-| `:molapi-room`               | Room-backed persistent registry foundation.                                    | Android, iOS |
-| `:molapi-http-editor`        | Compose Multiplatform screen for viewing, searching and editing HTTP mocks.    | Android, iOS |
-| `:molapi-http-gson`          | Gson helpers for JSON HTTP bodies.                                             | Android      |
-| `:molapi-http-retrofit`      | OkHttp/Retrofit interceptor integration.                                       | Android      |
-| `:sample`                    | Shared sample app code.                                                        | Android, iOS |
-| `:sampleAndroidApp`          | Android sample application entry point.                                        | Android      |
-| `SampleIosApp/`              | iOS sample application entry point.                                            | iOS          |
+| Module                        | Purpose                                                                        | Targets      |
+|-------------------------------|--------------------------------------------------------------------------------|--------------|
+| `:molapi-core`                | Generic request, matcher, response and registry contracts.                     | Android, iOS |
+| `:molapi-http`                | HTTP request/response model, matchers, in-memory registry aliases and DSL.     | Android, iOS |
+| `:molapi-http-ktor`           | Ktor Client plugin that returns a mock response before a real request is sent. | Android, iOS |
+| `:molapi-http-serialization`  | `kotlinx.serialization` helpers for JSON HTTP bodies.                          | Android, iOS |
+| `:molapi-room`                | Room-backed persistent registry foundation.                                    | Android, iOS |
+| `:molapi-http-editor`         | Compose Multiplatform screen for viewing, searching and editing HTTP mocks.    | Android, iOS |
+| `:molapi-http-android-assets` | Helps create JSON HTTP bodies from Android project assets.                     | Android      |
+| `:molapi-http-gson`           | Gson helpers for JSON HTTP bodies.                                             | Android      |
+| `:molapi-http-retrofit`       | OkHttp/Retrofit interceptor integration.                                       | Android      |
+| `:sample`                     | Shared sample app code.                                                        | Android, iOS |
+| `:sampleAndroidApp`           | Android sample application entry point.                                        | Android      |
+| `SampleIosApp/`               | iOS sample application entry point.                                            | iOS          |
 
 ## HTTP Mocking
 
@@ -133,6 +134,47 @@ val response = GsonHttpResponse(
 )
 ```
 
+## Android Assets
+
+Use `molapi-http-android-assets` when mock bodies are stored in Android project assets. The module
+only creates `JsonBody` values from asset files; request matching, response status and headers stay
+configured through the regular `molapi-http` API.
+
+```kotlin
+import android.content.Context
+import dag.khinkal.molapi.http.assets.AssetJsonBody
+import dag.khinkal.molapi.http.dsl.post
+import dag.khinkal.molapi.http.model.Headers
+import dag.khinkal.molapi.http.registry.HttpInMemoryApiMockRegistry
+import android.content.res.AssetManager
+
+fun createRegistry(
+    context: Context,
+    assetManager: AssetManager,
+): HttpInMemoryApiMockRegistry =
+    HttpInMemoryApiMockRegistry().apply {
+        post(
+            url = "/todos",
+            headers = Headers.jsonContent(),
+            body = AssetJsonBody(context, "requests/create-todo.json"),
+            response = JsonBody.fromAssets(context, "responses/todo-created.json"),
+            responseHeaders = Headers.jsonContent(),
+            statusCode = 201,
+        )
+        post(
+            url = "/todos",
+            headers = Headers.jsonContent(),
+            body = AssetJsonBody(assetManager, "requests/create-todo.json"),
+            response = JsonBody.fromAssets(assetManager, "responses/todo-created.json"),
+            responseHeaders = Headers.jsonContent(),
+            statusCode = 201,
+        )
+    }
+```
+
+`AssetJsonBody(context, path)` and `JsonBody.fromAssets(context, path)` read the asset text as UTF-8
+by default. Pass a `Charset` explicitly if an asset uses another encoding.
+
 ## Persistent Registry
 
 `:molapi-room` provides `RoomApiMockRegistry`, which stores mocks in Room and restores them through
@@ -176,6 +218,7 @@ Run focused library checks:
 ```bash
 ./gradlew :molapi-core:testAndroidHostTest :molapi-http:testAndroidHostTest
 ./gradlew :molapi-http-ktor:testAndroidHostTest
+./gradlew :molapi-http-android-assets:testAndroidHostTest
 ./gradlew :sample:testAndroidHostTest
 ```
 
@@ -196,4 +239,3 @@ simulator or device.
 - Public APIs use explicit Kotlin visibility.
 - Common modules avoid platform-only APIs in `commonMain`.
 - `:molapi-http` depends on `:molapi-core` as API because HTTP public types expose core contracts.
-- Dependency source inspection should go through `ksrc`, not direct `.gradle` access.
