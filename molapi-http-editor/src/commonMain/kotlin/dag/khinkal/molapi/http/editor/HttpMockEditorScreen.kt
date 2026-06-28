@@ -7,11 +7,12 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.selection.SelectionContainer
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
@@ -33,7 +34,33 @@ import androidx.navigation3.runtime.NavKey
 import dag.khinkal.molapi.http.model.HttpMethod
 import dag.khinkal.molapi.http.registry.HttpApiMockRegistry
 import molapi.molapi_http_editor.generated.resources.Res
-import molapi.molapi_http_editor.generated.resources.*
+import molapi.molapi_http_editor.generated.resources.add_mock_button
+import molapi.molapi_http_editor.generated.resources.any_method_button
+import molapi.molapi_http_editor.generated.resources.back_button
+import molapi.molapi_http_editor.generated.resources.clear_button
+import molapi.molapi_http_editor.generated.resources.collapse_content_button
+import molapi.molapi_http_editor.generated.resources.create_mock_title
+import molapi.molapi_http_editor.generated.resources.delete_button
+import molapi.molapi_http_editor.generated.resources.expand_content_button
+import molapi.molapi_http_editor.generated.resources.find_mocks_label
+import molapi.molapi_http_editor.generated.resources.header_line_format_error
+import molapi.molapi_http_editor.generated.resources.http_method_label
+import molapi.molapi_http_editor.generated.resources.http_mocks_title
+import molapi.molapi_http_editor.generated.resources.matcher_body_label
+import molapi.molapi_http_editor.generated.resources.matcher_headers_label
+import molapi.molapi_http_editor.generated.resources.matcher_url_label
+import molapi.molapi_http_editor.generated.resources.mock_response_title
+import molapi.molapi_http_editor.generated.resources.request_body_title
+import molapi.molapi_http_editor.generated.resources.request_headers_title
+import molapi.molapi_http_editor.generated.resources.request_matchers_title
+import molapi.molapi_http_editor.generated.resources.response_body_label
+import molapi.molapi_http_editor.generated.resources.response_body_title
+import molapi.molapi_http_editor.generated.resources.response_headers_label
+import molapi.molapi_http_editor.generated.resources.response_headers_title
+import molapi.molapi_http_editor.generated.resources.response_status_code_label
+import molapi.molapi_http_editor.generated.resources.status_code_label
+import molapi.molapi_http_editor.generated.resources.status_code_number_error
+import molapi.molapi_http_editor.generated.resources.visible_mocks_count
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 
@@ -115,7 +142,7 @@ private fun HttpMockListScreen(
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.spacedBy(16.dp),
-            contentPadding = PaddingValues(16.dp)
+            contentPadding = PaddingValues(16.dp),
         ) {
             item("header") {
                 Header(
@@ -148,7 +175,7 @@ private fun Header(
     onCreateMockClick: () -> Unit,
     onClearClick: () -> Unit,
 ) {
-    Row(
+    FlowRow(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
     ) {
@@ -202,6 +229,7 @@ private fun CreateMockScreen(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
+                .verticalScroll(rememberScrollState())
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
@@ -368,72 +396,75 @@ private fun MockRow(
     var isContentExpanded by remember(mock.id) { mutableStateOf(false) }
     val contentSections = mock.contentSections()
 
-    Column(
-        modifier = Modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
+    Surface(
+        shape = MaterialTheme.shapes.large,
+        color = MaterialTheme.colorScheme.primaryContainer,
     ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            Column(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(2.dp),
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
             ) {
-                Text(
-                    text = listOfNotNull(
-                        mock.method?.name ?: stringResource(Res.string.any_method_button),
-                        mock.url,
-                    )
-                        .joinToString(" "),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
-            TextButton(onClick = onDeleteClick) {
-                Text(stringResource(Res.string.delete_button))
-            }
-        }
-        Text(
-            text = stringResource(Res.string.status_code_label, mock.statusCode),
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.primary,
-        )
-
-        if (contentSections.isNotEmpty()) {
-            TextButton(
-                onClick = { isContentExpanded = !isContentExpanded },
-            ) {
-                Text(
-                    stringResource(
-                        if (isContentExpanded) {
-                            Res.string.collapse_content_button
-                        } else {
-                            Res.string.expand_content_button
-                        },
-                    ),
-                )
-            }
-            SelectionContainer {
                 Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .then(
-                            if (isContentExpanded) {
-                                Modifier
-                            } else {
-                                Modifier.heightIn(max = 100.dp)
-                            }
-                        ),
+                    modifier = Modifier.weight(1f),
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
-                    contentSections.forEach { section ->
-                        MockContentSection(section)
+                    Text(
+                        text = listOfNotNull(
+                            mock.method?.name ?: stringResource(Res.string.any_method_button),
+                            mock.url,
+                        )
+                            .joinToString(" "),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+
+                    Text(
+                        text = stringResource(Res.string.status_code_label, mock.statusCode),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.primary,
+                    )
+                }
+
+                TextButton(onClick = onDeleteClick) {
+                    Text(stringResource(Res.string.delete_button))
+                }
+            }
+
+            if (contentSections.isNotEmpty()) {
+                if (isContentExpanded) {
+                    SelectionContainer {
+                        Column(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalArrangement = Arrangement.spacedBy(8.dp),
+                        ) {
+                            contentSections.forEach { section ->
+                                MockContentSection(section)
+                            }
+                        }
                     }
+                }
+
+                TextButton(
+                    onClick = { isContentExpanded = !isContentExpanded },
+                ) {
+                    Text(
+                        stringResource(
+                            if (isContentExpanded) {
+                                Res.string.collapse_content_button
+                            } else {
+                                Res.string.expand_content_button
+                            },
+                        ),
+                    )
                 }
             }
         }
-        HorizontalDivider()
     }
 }
 
