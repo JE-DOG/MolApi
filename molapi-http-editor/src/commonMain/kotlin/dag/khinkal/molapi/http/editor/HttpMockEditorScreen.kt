@@ -7,9 +7,11 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material3.Button
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
@@ -19,7 +21,10 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -122,6 +127,7 @@ private fun HttpMockListScreen(
 
             items(
                 items = visibleMocks,
+                key = { mock -> mock.id },
             ) { mock ->
                 MockRow(
                     mock = mock,
@@ -355,6 +361,9 @@ private fun MockRow(
     mock: HttpMockEditorMock,
     onDeleteClick: () -> Unit,
 ) {
+    var isContentExpanded by remember(mock.id) { mutableStateOf(false) }
+    val contentSections = mock.contentSections()
+
     Column(
         modifier = Modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -383,33 +392,93 @@ private fun MockRow(
             style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.primary,
         )
-        if (!mock.requestHeaders.isNullOrBlank()) {
-            Text(
-                text = mock.requestHeaders,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
-        if (!mock.requestBody.isNullOrBlank()) {
-            Text(
-                text = mock.requestBody,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
-        if (!mock.responseHeaders.isNullOrBlank()) {
-            Text(
-                text = mock.responseHeaders,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
-        if (!mock.responseBody.isNullOrBlank()) {
-            Text(
-                text = mock.responseBody,
-                style = MaterialTheme.typography.bodySmall,
-            )
+
+        if (contentSections.isNotEmpty()) {
+            TextButton(
+                onClick = { isContentExpanded = !isContentExpanded },
+            ) {
+                Text(if (isContentExpanded) "Collapse content" else "Expand content")
+            }
+            SelectionContainer {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .then(
+                            if (isContentExpanded) {
+                                Modifier
+                            } else {
+                                Modifier.heightIn(max = 100.dp)
+                            }
+                        ),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    contentSections.forEach { section ->
+                        MockContentSection(section)
+                    }
+                }
+            }
         }
         HorizontalDivider()
+    }
+}
+
+@Composable
+private fun MockContentSection(
+    section: MockContentSection,
+) {
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(4.dp),
+    ) {
+        Text(
+            text = section.title,
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.primary,
+        )
+        Text(
+            text = section.content,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+    }
+}
+
+private data class MockContentSection(
+    val title: String,
+    val content: String,
+)
+
+private fun HttpMockEditorMock.contentSections(): List<MockContentSection> = buildList {
+    if (!requestHeaders.isNullOrBlank()) {
+        add(
+            MockContentSection(
+                title = "Request headers",
+                content = requestHeaders,
+            ),
+        )
+    }
+    if (!requestBody.isNullOrBlank()) {
+        add(
+            MockContentSection(
+                title = "Request body",
+                content = requestBody,
+            ),
+        )
+    }
+    if (!responseHeaders.isNullOrBlank()) {
+        add(
+            MockContentSection(
+                title = "Response headers",
+                content = responseHeaders,
+            ),
+        )
+    }
+    if (!responseBody.isNullOrBlank()) {
+        add(
+            MockContentSection(
+                title = "Response body",
+                content = responseBody,
+            ),
+        )
     }
 }
