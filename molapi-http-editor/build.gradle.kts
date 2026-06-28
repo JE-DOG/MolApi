@@ -29,6 +29,7 @@ kotlin {
     sourceSets {
         commonMain.dependencies {
             api(project(":molapi-http"))
+            implementation(libs.androidx.navigation3.runtime)
             implementation(libs.compose.foundation)
             implementation(libs.compose.material3)
             implementation(libs.compose.runtime)

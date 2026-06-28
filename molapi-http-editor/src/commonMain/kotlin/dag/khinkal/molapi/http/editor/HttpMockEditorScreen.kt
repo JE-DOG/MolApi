@@ -19,15 +19,20 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.navigation3.runtime.NavBackStack
+import androidx.navigation3.runtime.NavKey
 import dag.khinkal.molapi.http.model.HttpMethod
 import dag.khinkal.molapi.http.registry.HttpApiMockRegistry
+
+private sealed interface HttpMockEditorRoute : NavKey
+
+private data object MockListRoute : HttpMockEditorRoute
+
+private data object CreateMockRoute : HttpMockEditorRoute
 
 @Composable
 public fun HttpMockEditorScreen(
@@ -47,8 +52,52 @@ internal fun HttpMockEditorScreen(
     state: HttpMockEditorState,
     modifier: Modifier = Modifier,
 ) {
+    val backStack = remember { NavBackStack<HttpMockEditorRoute>(MockListRoute) }
+
+    NavigationContent(
+        backStack = backStack,
+        modifier = modifier,
+        state = state,
+    )
+}
+
+@Composable
+private fun NavigationContent(
+    backStack: NavBackStack<HttpMockEditorRoute>,
+    state: HttpMockEditorState,
+    modifier: Modifier = Modifier,
+) {
+    when (backStack.lastOrNull() ?: MockListRoute) {
+        MockListRoute -> HttpMockListScreen(
+            state = state,
+            modifier = modifier,
+            onCreateMockClick = { backStack.add(CreateMockRoute) },
+        )
+
+        CreateMockRoute -> CreateMockScreen(
+            state = state,
+            modifier = modifier,
+            onBackClick = {
+                if (backStack.size > 1) {
+                    backStack.removeLastOrNull()
+                }
+            },
+            onMockCreated = {
+                if (backStack.size > 1) {
+                    backStack.removeLastOrNull()
+                }
+            },
+        )
+    }
+}
+
+@Composable
+private fun HttpMockListScreen(
+    state: HttpMockEditorState,
+    onCreateMockClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
     val visibleMocks = state.collectVisibleMocks()
-    var isDraftFormExpanded by remember { mutableStateOf(false) }
 
     Surface(
         modifier = modifier.fillMaxSize(),
@@ -62,20 +111,13 @@ internal fun HttpMockEditorScreen(
             item("header") {
                 Header(
                     mocksCount = visibleMocks.size,
+                    onCreateMockClick = onCreateMockClick,
                     onClearClick = state::clearMocks,
                 )
             }
 
             item("search") {
                 SearchField(state)
-            }
-
-            item("draft") {
-                DraftForm(
-                    state = state,
-                    isExpanded = isDraftFormExpanded,
-                    onExpandedChange = { isExpanded -> isDraftFormExpanded = isExpanded },
-                )
             }
 
             items(
@@ -93,6 +135,7 @@ internal fun HttpMockEditorScreen(
 @Composable
 private fun Header(
     mocksCount: Int,
+    onCreateMockClick: () -> Unit,
     onClearClick: () -> Unit,
 ) {
     Row(
@@ -111,8 +154,15 @@ private fun Header(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
-        OutlinedButton(onClick = onClearClick) {
-            Text("Clear")
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            Button(onClick = onCreateMockClick) {
+                Text("Add mock")
+            }
+            OutlinedButton(onClick = onClearClick) {
+                Text("Clear")
+            }
         }
     }
 }
@@ -129,16 +179,15 @@ private fun SearchField(state: HttpMockEditorState) {
 }
 
 @Composable
-private fun DraftForm(
+private fun CreateMockScreen(
     state: HttpMockEditorState,
-    isExpanded: Boolean,
-    onExpandedChange: (Boolean) -> Unit,
+    onBackClick: () -> Unit,
+    onMockCreated: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     Surface(
-        modifier = Modifier.fillMaxWidth(),
-        shape = MaterialTheme.shapes.medium,
-        tonalElevation = 2.dp,
-        shadowElevation = 1.dp,
+        modifier = modifier.fillMaxSize(),
+        color = MaterialTheme.colorScheme.background,
     ) {
         Column(
             modifier = Modifier
@@ -151,35 +200,33 @@ private fun DraftForm(
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
                 Text(
-                    text = "Add mock",
-                    style = MaterialTheme.typography.titleMedium,
+                    text = "Create mock",
+                    style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.SemiBold,
                 )
-                TextButton(onClick = { onExpandedChange(!isExpanded) }) {
-                    Text(if (isExpanded) "Hide" else "Show")
+                TextButton(onClick = onBackClick) {
+                    Text("Back")
                 }
             }
 
-            if (isExpanded) {
-                DraftMatcherFields(state)
-                HorizontalDivider()
-                DraftResponseFields(state)
-                state.draftError?.let { error ->
-                    Text(
-                        text = error,
-                        color = MaterialTheme.colorScheme.error,
-                        style = MaterialTheme.typography.bodySmall,
-                    )
-                }
-                Button(
-                    onClick = {
-                        if (state.addDraftMock()) {
-                            onExpandedChange(false)
-                        }
-                    },
-                ) {
-                    Text("Add mock")
-                }
+            DraftMatcherFields(state)
+            HorizontalDivider()
+            DraftResponseFields(state)
+            state.draftError?.let { error ->
+                Text(
+                    text = error,
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodySmall,
+                )
+            }
+            Button(
+                onClick = {
+                    if (state.addDraftMock()) {
+                        onMockCreated()
+                    }
+                },
+            ) {
+                Text("Add mock")
             }
         }
     }
