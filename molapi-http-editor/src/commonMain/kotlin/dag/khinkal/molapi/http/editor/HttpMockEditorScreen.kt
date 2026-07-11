@@ -31,6 +31,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
+import dag.khinkal.molapi.http.editor.util.resultlauncher.model.FileContentType
+import dag.khinkal.molapi.http.editor.util.resultlauncher.rememberFileResultLauncher
 import dag.khinkal.molapi.http.model.HttpMethod
 import dag.khinkal.molapi.http.registry.HttpApiMockRegistry
 import molapi.molapi_http_editor.generated.resources.Res
@@ -46,6 +48,7 @@ import molapi.molapi_http_editor.generated.resources.find_mocks_label
 import molapi.molapi_http_editor.generated.resources.header_line_format_error
 import molapi.molapi_http_editor.generated.resources.http_method_label
 import molapi.molapi_http_editor.generated.resources.http_mocks_title
+import molapi.molapi_http_editor.generated.resources.json_document_read_error
 import molapi.molapi_http_editor.generated.resources.matcher_body_label
 import molapi.molapi_http_editor.generated.resources.matcher_headers_label
 import molapi.molapi_http_editor.generated.resources.matcher_url_label
@@ -58,6 +61,7 @@ import molapi.molapi_http_editor.generated.resources.response_body_title
 import molapi.molapi_http_editor.generated.resources.response_headers_label
 import molapi.molapi_http_editor.generated.resources.response_headers_title
 import molapi.molapi_http_editor.generated.resources.response_status_code_label
+import molapi.molapi_http_editor.generated.resources.select_json_document_button
 import molapi.molapi_http_editor.generated.resources.status_code_label
 import molapi.molapi_http_editor.generated.resources.status_code_number_error
 import molapi.molapi_http_editor.generated.resources.visible_mocks_count
@@ -222,6 +226,15 @@ private fun CreateMockScreen(
     onMockCreated: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val requestFileLauncher = rememberFileResultLauncher(
+        onDocumentSelected = state::setDraftMatcherBodyFromDocument,
+        onDocumentReadFailed = state::setJsonDocumentReadFailed,
+    )
+    val responseFileLauncher = rememberFileResultLauncher(
+        onDocumentSelected = state::setDraftResponseBodyFromDocument,
+        onDocumentReadFailed = state::setJsonDocumentReadFailed,
+    )
+
     Surface(
         modifier = modifier.fillMaxSize(),
         color = MaterialTheme.colorScheme.background,
@@ -247,9 +260,19 @@ private fun CreateMockScreen(
                 }
             }
 
-            DraftMatcherFields(state)
+            DraftMatcherFields(
+                state = state,
+                onSelectJsonDocumentClick = {
+                    requestFileLauncher.launch(listOf(FileContentType.JSON))
+                },
+            )
             HorizontalDivider()
-            DraftResponseFields(state)
+            DraftResponseFields(
+                state = state,
+                onSelectJsonDocumentClick = {
+                    responseFileLauncher.launch(listOf(FileContentType.JSON))
+                },
+            )
             state.draftError?.let { error ->
                 Text(
                     text = error.asText(),
@@ -271,7 +294,10 @@ private fun CreateMockScreen(
 }
 
 @Composable
-private fun DraftMatcherFields(state: HttpMockEditorState) {
+private fun DraftMatcherFields(
+    state: HttpMockEditorState,
+    onSelectJsonDocumentClick: () -> Unit,
+) {
     Column(
         modifier = Modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(10.dp),
@@ -302,11 +328,17 @@ private fun DraftMatcherFields(state: HttpMockEditorState) {
             minLines = 2,
             label = { Text(stringResource(Res.string.matcher_body_label)) },
         )
+        OutlinedButton(onClick = onSelectJsonDocumentClick) {
+            Text(stringResource(Res.string.select_json_document_button))
+        }
     }
 }
 
 @Composable
-private fun DraftResponseFields(state: HttpMockEditorState) {
+private fun DraftResponseFields(
+    state: HttpMockEditorState,
+    onSelectJsonDocumentClick: () -> Unit,
+) {
     Column(
         modifier = Modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(10.dp),
@@ -333,6 +365,9 @@ private fun DraftResponseFields(state: HttpMockEditorState) {
             minLines = 2,
             label = { Text(stringResource(Res.string.response_body_label)) },
         )
+        OutlinedButton(onClick = onSelectJsonDocumentClick) {
+            Text(stringResource(Res.string.select_json_document_button))
+        }
     }
 }
 
@@ -503,6 +538,10 @@ private fun HttpMockEditorDraftError.asText(): String = when (this) {
     is HttpMockEditorDraftError.InvalidHeaderLine -> stringResource(
         Res.string.header_line_format_error,
         lineNumber,
+    )
+
+    HttpMockEditorDraftError.JsonDocumentReadFailed -> stringResource(
+        Res.string.json_document_read_error,
     )
 }
 

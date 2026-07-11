@@ -31,6 +31,7 @@ internal data class HttpMockEditorMock(
 internal sealed interface HttpMockEditorDraftError {
     data object StatusCodeMustBeNumber : HttpMockEditorDraftError
     data class InvalidHeaderLine(val lineNumber: Int) : HttpMockEditorDraftError
+    data object JsonDocumentReadFailed : HttpMockEditorDraftError
 }
 
 internal class HttpMockEditorState(
@@ -49,7 +50,7 @@ internal class HttpMockEditorState(
 
     var draftResponseStatusCode: String by mutableStateOf("200")
 
-    var draftResponseHeaders: String by mutableStateOf("")
+    var draftResponseHeaders: String by mutableStateOf("Content-Type: application/json\n")
 
     var draftResponseBody: String by mutableStateOf("")
 
@@ -103,6 +104,7 @@ internal class HttpMockEditorState(
             draftError = HttpMockEditorDraftError.StatusCodeMustBeNumber
             return false
         }
+        draftError = null
 
         val matcherHeaders = if (draftMatcherHeaders.isBlank()) {
             null
@@ -136,13 +138,27 @@ internal class HttpMockEditorState(
         return true
     }
 
+    fun setDraftMatcherBodyFromDocument(body: String) {
+        draftMatcherBody = body
+        draftError = null
+    }
+
+    fun setDraftResponseBodyFromDocument(body: String) {
+        draftResponseBody = body
+        draftError = null
+    }
+
+    fun setJsonDocumentReadFailed() {
+        draftError = HttpMockEditorDraftError.JsonDocumentReadFailed
+    }
+
     private fun resetDraft() {
         draftMatcherUrl = ""
         draftMatcherMethod = HttpMethod.GET
         draftMatcherHeaders = ""
         draftMatcherBody = ""
         draftResponseStatusCode = "200"
-        draftResponseHeaders = ""
+        draftResponseHeaders = "Content-Type: application/json\n"
         draftResponseBody = ""
         draftError = null
     }

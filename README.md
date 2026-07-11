@@ -203,7 +203,8 @@ fun MockEditor(
 ```
 
 The screen can list registered HTTP mocks, filter them, add new JSON mocks and clear or remove
-entries from the registry.
+entries from the registry. Request and response JSON bodies can be typed inline or loaded through
+the platform document picker.
 
 ## Running
 

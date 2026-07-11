@@ -13,6 +13,7 @@
     <string name="any_method_button">ANY</string>
     <string name="matcher_headers_label">Matcher headers</string>
     <string name="matcher_body_label">Matcher JSON body</string>
+    <string name="select_json_document_button">Select JSON file</string>
     <string name="mock_response_title">Mock response</string>
     <string name="response_status_code_label">Response status code</string>
     <string name="response_headers_label">Response headers</string>
@@ -27,4 +28,5 @@
     <string name="response_body_title">Response body</string>
     <string name="status_code_number_error">Status code must be a number</string>
     <string name="header_line_format_error">Header line %1$d must use Name: value</string>
+    <string name="json_document_read_error">Could not read selected JSON file</string>
 </resources>
