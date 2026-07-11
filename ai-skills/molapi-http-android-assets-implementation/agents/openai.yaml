@@ -1,0 +1,4 @@
+interface:
+  display_name: "MolApi Android Assets Implementation"
+  short_description: "Implement asset JSON helpers"
+  default_prompt: "Use $molapi-http-android-assets-implementation to implement a molapi-http-android-assets change."

@@ -1,0 +1,4 @@
+interface:
+  display_name: "MolApi Room Implementation"
+  short_description: "Implement molapi-room changes"
+  default_prompt: "Use $molapi-room-implementation to implement a molapi-room change."

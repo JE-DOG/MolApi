@@ -1,0 +1,4 @@
+interface:
+  display_name: "MolApi Ktor Implementation"
+  short_description: "Implement molapi-http-ktor changes"
+  default_prompt: "Use $molapi-http-ktor-implementation to implement a molapi-http-ktor change."

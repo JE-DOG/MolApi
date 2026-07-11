@@ -1,0 +1,4 @@
+interface:
+  display_name: "MolApi HTTP Implementation"
+  short_description: "Implement molapi-http changes"
+  default_prompt: "Use $molapi-http-implementation to implement a molapi-http change."

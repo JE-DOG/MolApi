@@ -1,0 +1,4 @@
+interface:
+  display_name: "MolApi Change Validation"
+  short_description: "Plan focused MolApi validation"
+  default_prompt: "Use $molapi-change-validation to choose and run focused validation for MolApi changes."

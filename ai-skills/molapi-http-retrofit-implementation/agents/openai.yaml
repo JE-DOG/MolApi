@@ -1,0 +1,4 @@
+interface:
+  display_name: "MolApi Retrofit Implementation"
+  short_description: "Implement Retrofit adapter changes"
+  default_prompt: "Use $molapi-http-retrofit-implementation to implement a molapi-http-retrofit change."

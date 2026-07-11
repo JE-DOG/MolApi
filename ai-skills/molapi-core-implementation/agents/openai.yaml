@@ -1,0 +1,4 @@
+interface:
+  display_name: "MolApi Core Implementation"
+  short_description: "Implement molapi-core changes"
+  default_prompt: "Use $molapi-core-implementation to implement a molapi-core change."

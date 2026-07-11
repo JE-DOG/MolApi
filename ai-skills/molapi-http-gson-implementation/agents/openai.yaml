@@ -1,0 +1,4 @@
+interface:
+  display_name: "MolApi Gson Implementation"
+  short_description: "Implement molapi-http-gson changes"
+  default_prompt: "Use $molapi-http-gson-implementation to implement a molapi-http-gson change."

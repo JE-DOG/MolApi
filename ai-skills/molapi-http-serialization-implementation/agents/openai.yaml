@@ -1,0 +1,4 @@
+interface:
+  display_name: "MolApi Serialization Implementation"
+  short_description: "Implement serialization helpers"
+  default_prompt: "Use $molapi-http-serialization-implementation to implement a molapi-http-serialization change."

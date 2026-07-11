@@ -3,6 +3,11 @@
 MolApi is a Kotlin Multiplatform toolkit for registering API mocks and resolving incoming requests
 against them. The core idea is intentionally small:
 
+## AI Skills
+
+The repository includes project-specific ai skills in [`ai-skills/`](ai-skills/). They provide
+implementation guidance for each MolApi library module
+
 ```text
 request -> registry.find(request) -> mock.matcher.matches(request) -> mock.response
 ```
