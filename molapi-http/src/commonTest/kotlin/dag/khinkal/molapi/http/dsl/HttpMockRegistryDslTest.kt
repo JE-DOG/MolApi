@@ -36,7 +36,7 @@ class HttpMockRegistryDslTest {
     @Test
     fun matchesOptionalRequestHeadersAndBody() {
         val registry = testRegistry()
-        val headers = Headers(mapOf("Authorization" to setOf("Bearer token")))
+        val headers = Headers(mapOf("Authorization" to listOf("Bearer token")))
         val body = JsonBody("""{"title":"new"}""")
 
         registry.post(

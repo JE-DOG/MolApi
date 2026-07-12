@@ -134,7 +134,7 @@ private data class RoomHttpUrl(
 @Serializable
 private data class RoomHttpResponse(
     val body: String?,
-    val headers: Map<String, Set<String>>?,
+    val headers: Map<String, List<String>>?,
     val statusCode: Int,
 )
 

@@ -37,7 +37,7 @@ class OkHttpRequestAdapterTest {
         )
         assertEquals(HttpMethod.POST, molApiRequest?.method)
         assertEquals(JsonBody("""{"title":"task"}"""), molApiRequest?.body)
-        assertEquals(setOf("application/json"), molApiRequest?.headers?.values?.get("Accept"))
+        assertEquals(listOf("application/json"), molApiRequest?.headers?.values?.get("Accept"))
     }
 
     @Test

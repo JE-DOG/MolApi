@@ -33,7 +33,7 @@ Inspect current local files:
 Preserve the HTTP model:
 
 - `HttpMethod` supports only `GET`, `POST`, `PUT`, `PATCH`, `DELETE`.
-- `Headers` wraps `Map<String, Set<String>>`; keep helper semantics such as JSON content headers
+- `Headers` wraps `Map<String, List<String>>`; keep helper semantics such as JSON content headers
   aligned with existing code.
 - `HttpBody` is the body abstraction; `JsonBody` stores raw JSON text.
 - `HttpRequest` implements core `ApiRequest`.

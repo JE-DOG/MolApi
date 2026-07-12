@@ -21,8 +21,8 @@ class KtorHttpResponseAdapterTest {
         val response = HttpResponse(
             headers = Headers(
                 mapOf(
-                    HttpHeaders.ContentType to setOf("application/json"),
-                    "X-Test" to setOf("one", "two")
+                    HttpHeaders.ContentType to listOf("application/json"),
+                    "X-Test" to listOf("one", "two")
                 )
             ),
             body = JsonBody("""{"tasks":[]}"""),

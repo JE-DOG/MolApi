@@ -1,7 +1,7 @@
 package dag.khinkal.molapi.http.model
 
 public data class Headers(
-    public val values: Map<String, Set<String>>
+    public val values: Map<String, List<String>>
 ) {
 
     public companion object {
@@ -9,7 +9,7 @@ public data class Headers(
         public fun empty(): Headers = Headers(emptyMap())
 
         public fun jsonContent(): Headers = Headers(
-            mapOf("Content-Type" to setOf("application/json")),
+            mapOf("Content-Type" to listOf("application/json")),
         )
     }
 }

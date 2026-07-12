@@ -34,28 +34,60 @@ Android-only adapters where the underlying stack is Android/JVM-only.
 
 ## HTTP Mocking
 
-Create an HTTP registry and register mocks through the DSL:
+Create an HTTP registry and register mocks through the DSL. The main response overloads are shown
+below; `get`, `post`, `put`, `patch`, `head`, and `delete` have these response forms, while
+generic `http` also accepts an explicit `HttpMethod`:
 
 ```kotlin
 import dag.khinkal.molapi.http.dsl.get
+import dag.khinkal.molapi.http.dsl.http
+import dag.khinkal.molapi.http.dsl.patch
 import dag.khinkal.molapi.http.dsl.post
+import dag.khinkal.molapi.http.dsl.put
 import dag.khinkal.molapi.http.model.Headers
+import dag.khinkal.molapi.http.model.HttpMethod
+import dag.khinkal.molapi.http.model.HttpResponse
 import dag.khinkal.molapi.http.model.HttpUrl
 import dag.khinkal.molapi.http.model.JsonBody
 import dag.khinkal.molapi.http.registry.HttpInMemoryApiMockRegistry
 
 val registry = HttpInMemoryApiMockRegistry().apply {
+    // A JSON string shortcut.
     get(
         path = "/todos",
         json = """[{"id":1,"title":"from molapi","completed":false}]""",
     )
 
+    // A full response, including custom headers and status.
     post(
         url = HttpUrl(path = "/todos"),
         headers = Headers.jsonContent(),
         body = JsonBody("""{"title":"new"}"""),
-        json = """{"id":2,"title":"new","completed":false}""",
-        statusCode = 201,
+        response = HttpResponse(
+            body = JsonBody("""{"id":2,"title":"new","completed":false}"""),
+            headers = Headers.jsonContent(),
+            statusCode = 201,
+        ),
+    )
+
+    // An arbitrary response body with its metadata.
+    put(
+        path = "/todos/2",
+        response = JsonBody("""{"completed":true}"""),
+        responseHeaders = Headers.jsonContent(),
+        statusCode = 202,
+    )
+
+    // A response produced lazily from the request registration code.
+    patch("/todos/2") {
+        HttpResponse(body = JsonBody("""{"completed":false}"""))
+    }
+
+    // Without selected http method
+    http(
+        method = HttpMethod.DELETE,
+        path = "/todos/2",
+        response = HttpResponse(statusCode = 204),
     )
 }
 ```

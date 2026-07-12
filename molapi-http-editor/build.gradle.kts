@@ -38,6 +38,8 @@ kotlin {
             implementation(libs.compose.runtime)
             implementation(libs.compose.components.resources)
             implementation(libs.compose.ui)
+            implementation(libs.androidx.lifecycle.runtimeCompose)
+            implementation(libs.androidx.lifecycle.viewmodelCompose)
         }
         androidMain.dependencies {
             implementation(libs.androidx.activity.compose)

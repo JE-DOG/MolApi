@@ -18,8 +18,8 @@ class OkHttpResponseAdapterTest {
         val response = HttpResponse(
             headers = Headers(
                 mapOf(
-                    "Content-Type" to setOf("application/json"),
-                    "X-Test" to setOf("one", "two"),
+                    "Content-Type" to listOf("application/json"),
+                    "X-Test" to listOf("one", "two"),
                 ),
             ),
             body = JsonBody("""{"tasks":[]}"""),

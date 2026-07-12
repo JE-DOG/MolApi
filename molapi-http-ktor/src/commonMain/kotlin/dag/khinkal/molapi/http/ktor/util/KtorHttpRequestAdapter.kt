@@ -44,7 +44,7 @@ private fun KtorHttpMethod.toMolApiMethodOrNull(): HttpMethod? = when (this) {
 
 private fun KtorHeaders.toMolApiHeaders(): Headers = Headers(
     entries().associate { (name, values) ->
-        name to values.toSet()
+        name to values
     }
 )
 

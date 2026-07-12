@@ -11,8 +11,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeContentPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -156,9 +154,7 @@ private fun HttpMockEditorDialog(
             shape = MaterialTheme.shapes.medium,
             color = MaterialTheme.colorScheme.surface,
         ) {
-            Column(
-                modifier = Modifier.verticalScroll(rememberScrollState()),
-            ) {
+            Column {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()

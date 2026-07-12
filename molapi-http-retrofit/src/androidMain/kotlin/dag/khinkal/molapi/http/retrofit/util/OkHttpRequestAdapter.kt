@@ -40,7 +40,7 @@ private fun String.toMolApiMethodOrNull(): HttpMethod? = when (uppercase()) {
 
 private fun okhttp3.Headers.toMolApiHeaders(): Headers = Headers(
     names().associateWith { name ->
-        values(name).toSet()
+        values(name)
     },
 )
 

@@ -8,40 +8,41 @@ import dag.khinkal.molapi.http.model.JsonBody
 import dag.khinkal.molapi.http.registry.HttpInMemoryApiMockRegistry
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertIs
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
-class HttpMockEditorStateTest {
+class HttpMockEditorViewModelTest {
 
     @Test
     fun addDraftMockUsesResponseBodyLoadedFromDocument() {
         val registry = HttpInMemoryApiMockRegistry()
-        val state = HttpMockEditorState(registry = registry)
+        val viewModel = HttpMockEditorViewModel(registry = registry)
 
-        state.draftMatcherUrl = "/tasks/42"
-        state.setDraftResponseBodyFromDocument("""{"id":42}""")
+        viewModel.onDraftMatcherUrlChanged("/tasks/42")
+        viewModel.onDraftResponseBodyDocumentSelected("""{"id":42}""")
 
-        assertTrue(state.addDraftMock())
+        assertTrue(viewModel.addDraftMock())
 
         val mock = registry.mocks.value.single()
         val matcher = assertIs<RawHttpUrlRequestMatcher>(mock.matcher)
         assertEquals("/tasks/42", matcher.rawUrl)
         assertEquals(JsonBody("""{"id":42}"""), mock.response.body)
-        assertEquals("", state.draftResponseBody)
+        assertEquals("", viewModel.draft.responseBody)
     }
 
     @Test
     fun addDraftMockUsesMatcherBodyLoadedFromDocument() {
         val registry = HttpInMemoryApiMockRegistry()
-        val state = HttpMockEditorState(registry = registry)
+        val viewModel = HttpMockEditorViewModel(registry = registry)
 
-        state.draftMatcherUrl = "/tasks"
-        state.draftMatcherMethod = HttpMethod.POST
-        state.setDraftMatcherBodyFromDocument("""{"title":"new"}""")
-        state.draftResponseStatusCode = "201"
+        viewModel.onDraftMatcherUrlChanged("/tasks")
+        viewModel.onDraftMatcherMethodChanged(HttpMethod.POST)
+        viewModel.onDraftMatcherBodyDocumentSelected("""{"title":"new"}""")
+        viewModel.onDraftResponseStatusCodeChanged("201")
 
-        assertTrue(state.addDraftMock())
+        assertTrue(viewModel.addDraftMock())
 
         val mock = registry.find(
             HttpRequest(
@@ -57,11 +58,11 @@ class HttpMockEditorStateTest {
     @Test
     fun addDraftMockMatchesTextAgainstFullRequestUrl() {
         val registry = HttpInMemoryApiMockRegistry()
-        val state = HttpMockEditorState(registry = registry)
+        val viewModel = HttpMockEditorViewModel(registry = registry)
 
-        state.draftMatcherUrl = "example.com/tasks"
+        viewModel.onDraftMatcherUrlChanged("example.com/tasks")
 
-        assertTrue(state.addDraftMock())
+        assertTrue(viewModel.addDraftMock())
         assertNotNull(
             registry.find(
                 HttpRequest(
@@ -80,11 +81,58 @@ class HttpMockEditorStateTest {
     @Test
     fun setJsonDocumentReadFailedShowsDraftError() {
         val registry = HttpInMemoryApiMockRegistry()
-        val state = HttpMockEditorState(registry = registry)
+        val viewModel = HttpMockEditorViewModel(registry = registry)
 
-        state.setJsonDocumentReadFailed()
+        viewModel.onJsonDocumentReadFailed()
 
-        assertEquals(HttpMockEditorDraftError.JsonDocumentReadFailed, state.draftError)
+        assertEquals(HttpMockEditorDraftError.JsonDocumentReadFailed, viewModel.draft.error)
         assertTrue(registry.mocks.value.isEmpty())
+    }
+
+    @Test
+    fun keepsDraftAndDestinationInViewModel() {
+        val viewModel = HttpMockEditorViewModel(HttpInMemoryApiMockRegistry())
+
+        viewModel.onDraftMatcherUrlChanged("/tasks")
+        viewModel.showCreateMock()
+
+        assertEquals(HttpMockEditorDestination.Create, viewModel.destination)
+        assertEquals("/tasks", viewModel.draft.matcherUrl)
+    }
+
+    @Test
+    fun addDraftMockRejectsOutOfRangeStatusCode() {
+        val viewModel = HttpMockEditorViewModel(HttpInMemoryApiMockRegistry())
+
+        viewModel.onDraftResponseStatusCodeChanged("99")
+
+        assertFalse(viewModel.addDraftMock())
+        assertEquals(HttpMockEditorDraftError.StatusCodeOutOfRange, viewModel.draft.error)
+    }
+
+    @Test
+    fun addDraftMockIdentifiesInvalidMatcherHeader() {
+        val viewModel = HttpMockEditorViewModel(HttpInMemoryApiMockRegistry())
+
+        viewModel.onDraftMatcherHeadersChanged("Missing separator")
+
+        assertFalse(viewModel.addDraftMock())
+        assertEquals(
+            HttpMockEditorDraftError.InvalidMatcherHeaderLine(lineNumber = 1),
+            viewModel.draft.error,
+        )
+    }
+
+    @Test
+    fun addDraftMockIdentifiesInvalidResponseHeader() {
+        val viewModel = HttpMockEditorViewModel(HttpInMemoryApiMockRegistry())
+
+        viewModel.onDraftResponseHeadersChanged("Content-Type")
+
+        assertFalse(viewModel.addDraftMock())
+        assertEquals(
+            HttpMockEditorDraftError.InvalidResponseHeaderLine(lineNumber = 1),
+            viewModel.draft.error,
+        )
     }
 }

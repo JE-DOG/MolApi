@@ -112,7 +112,7 @@ class TodoApiTest {
                 HttpResponse(
                     headers = Headers(
                         mapOf(
-                            "X-MolApi-Scenario" to setOf("empty-list"),
+                            "X-MolApi-Scenario" to listOf("empty-list"),
                         ),
                     ),
                     body = JsonBody("[]"),

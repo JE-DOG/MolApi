@@ -31,7 +31,7 @@ class MolApiRetrofitInterceptorTest {
             ) {
                 GsonHttpResponse(
                     headers = Headers(
-                        mapOf("Content-Type" to setOf("application/json")),
+                        mapOf("Content-Type" to listOf("application/json")),
                     ),
                     body = TestTask(id = 42, title = "from molapi"),
                 )
@@ -80,7 +80,7 @@ class MolApiRetrofitInterceptorTest {
             ) {
                 GsonHttpResponse(
                     headers = Headers(
-                        mapOf("Content-Type" to setOf("application/json")),
+                        mapOf("Content-Type" to listOf("application/json")),
                     ),
                     body = TestTask(id = 9, title = "new"),
                 )

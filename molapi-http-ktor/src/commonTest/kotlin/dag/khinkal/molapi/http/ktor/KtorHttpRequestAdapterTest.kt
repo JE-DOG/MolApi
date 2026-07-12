@@ -46,7 +46,7 @@ class KtorHttpRequestAdapterTest {
         )
         assertEquals(HttpMethod.POST, request?.method)
         assertEquals(JsonBody("{}"), request?.body)
-        assertEquals(setOf("application/json"), request?.headers?.values?.get(HttpHeaders.Accept))
+        assertEquals(listOf("application/json"), request?.headers?.values?.get(HttpHeaders.Accept))
     }
 
     @Test

@@ -1,3 +1,5 @@
+@file:Suppress("DSL_MARKER_APPLIED_TO_WRONG_TARGET")
+
 package dag.khinkal.molapi.http.dsl
 
 import dag.khinkal.molapi.http.matcher.BaseHttpRequestMatcher
@@ -9,6 +11,10 @@ import dag.khinkal.molapi.http.model.HttpUrl
 import dag.khinkal.molapi.http.model.JsonBody
 import dag.khinkal.molapi.http.registry.HttpApiMockRegistry
 
+@DslMarker
+private annotation class HttpApiMockRegistryDsl
+
+@HttpApiMockRegistryDsl
 public fun HttpApiMockRegistry.http(
     method: HttpMethod,
     path: String? = null,
@@ -33,6 +39,7 @@ public fun HttpApiMockRegistry.http(
     response = response,
 )
 
+@HttpApiMockRegistryDsl
 public fun HttpApiMockRegistry.http(
     method: HttpMethod,
     path: String? = null,
@@ -57,6 +64,7 @@ public fun HttpApiMockRegistry.http(
     response = response,
 )
 
+@HttpApiMockRegistryDsl
 public fun HttpApiMockRegistry.http(
     method: HttpMethod,
     path: String? = null,
@@ -87,6 +95,7 @@ public fun HttpApiMockRegistry.http(
     ),
 )
 
+@HttpApiMockRegistryDsl
 public fun HttpApiMockRegistry.http(
     method: HttpMethod,
     path: String? = null,
@@ -117,6 +126,7 @@ public fun HttpApiMockRegistry.http(
     ),
 )
 
+@HttpApiMockRegistryDsl
 public fun HttpApiMockRegistry.http(
     method: HttpMethod,
     url: HttpUrl,
@@ -131,6 +141,7 @@ public fun HttpApiMockRegistry.http(
     response = response,
 )
 
+@HttpApiMockRegistryDsl
 public fun HttpApiMockRegistry.http(
     method: HttpMethod,
     url: HttpUrl,
@@ -145,6 +156,7 @@ public fun HttpApiMockRegistry.http(
     response = response,
 )
 
+@HttpApiMockRegistryDsl
 public fun HttpApiMockRegistry.http(
     method: HttpMethod,
     url: HttpUrl,
@@ -165,6 +177,7 @@ public fun HttpApiMockRegistry.http(
     ),
 )
 
+@HttpApiMockRegistryDsl
 public fun HttpApiMockRegistry.http(
     method: HttpMethod,
     url: HttpUrl,
@@ -185,6 +198,7 @@ public fun HttpApiMockRegistry.http(
     ),
 )
 
+@HttpApiMockRegistryDsl
 public fun HttpApiMockRegistry.get(
     path: String? = null,
     scheme: String? = null,
@@ -207,6 +221,7 @@ public fun HttpApiMockRegistry.get(
     response = response,
 )
 
+@HttpApiMockRegistryDsl
 public fun HttpApiMockRegistry.get(
     path: String? = null,
     scheme: String? = null,
@@ -229,6 +244,7 @@ public fun HttpApiMockRegistry.get(
     response = response,
 )
 
+@HttpApiMockRegistryDsl
 public fun HttpApiMockRegistry.get(
     path: String? = null,
     scheme: String? = null,
@@ -257,6 +273,7 @@ public fun HttpApiMockRegistry.get(
     ),
 )
 
+@HttpApiMockRegistryDsl
 public fun HttpApiMockRegistry.get(
     path: String? = null,
     scheme: String? = null,
@@ -285,6 +302,7 @@ public fun HttpApiMockRegistry.get(
     ),
 )
 
+@HttpApiMockRegistryDsl
 public fun HttpApiMockRegistry.get(
     url: HttpUrl,
     headers: Headers? = null,
@@ -298,6 +316,7 @@ public fun HttpApiMockRegistry.get(
     response = response,
 )
 
+@HttpApiMockRegistryDsl
 public fun HttpApiMockRegistry.get(
     url: HttpUrl,
     headers: Headers? = null,
@@ -311,6 +330,7 @@ public fun HttpApiMockRegistry.get(
     response = response,
 )
 
+@HttpApiMockRegistryDsl
 public fun HttpApiMockRegistry.get(
     url: HttpUrl,
     headers: Headers? = null,
@@ -330,6 +350,7 @@ public fun HttpApiMockRegistry.get(
     ),
 )
 
+@HttpApiMockRegistryDsl
 public fun HttpApiMockRegistry.get(
     url: HttpUrl,
     headers: Headers? = null,
@@ -349,6 +370,7 @@ public fun HttpApiMockRegistry.get(
     ),
 )
 
+@HttpApiMockRegistryDsl
 public fun HttpApiMockRegistry.post(
     path: String? = null,
     scheme: String? = null,
@@ -371,6 +393,7 @@ public fun HttpApiMockRegistry.post(
     response = response,
 )
 
+@HttpApiMockRegistryDsl
 public fun HttpApiMockRegistry.post(
     path: String? = null,
     scheme: String? = null,
@@ -393,6 +416,7 @@ public fun HttpApiMockRegistry.post(
     response = response,
 )
 
+@HttpApiMockRegistryDsl
 public fun HttpApiMockRegistry.post(
     path: String? = null,
     scheme: String? = null,
@@ -421,6 +445,7 @@ public fun HttpApiMockRegistry.post(
     ),
 )
 
+@HttpApiMockRegistryDsl
 public fun HttpApiMockRegistry.post(
     path: String? = null,
     scheme: String? = null,
@@ -449,6 +474,7 @@ public fun HttpApiMockRegistry.post(
     ),
 )
 
+@HttpApiMockRegistryDsl
 public fun HttpApiMockRegistry.post(
     url: HttpUrl,
     headers: Headers? = null,
@@ -462,6 +488,7 @@ public fun HttpApiMockRegistry.post(
     response = response,
 )
 
+@HttpApiMockRegistryDsl
 public fun HttpApiMockRegistry.post(
     url: HttpUrl,
     headers: Headers? = null,
@@ -475,6 +502,7 @@ public fun HttpApiMockRegistry.post(
     response = response,
 )
 
+@HttpApiMockRegistryDsl
 public fun HttpApiMockRegistry.post(
     url: HttpUrl,
     headers: Headers? = null,
@@ -494,6 +522,7 @@ public fun HttpApiMockRegistry.post(
     ),
 )
 
+@HttpApiMockRegistryDsl
 public fun HttpApiMockRegistry.post(
     url: HttpUrl,
     headers: Headers? = null,
@@ -513,6 +542,7 @@ public fun HttpApiMockRegistry.post(
     ),
 )
 
+@HttpApiMockRegistryDsl
 public fun HttpApiMockRegistry.put(
     path: String? = null,
     scheme: String? = null,
@@ -535,6 +565,7 @@ public fun HttpApiMockRegistry.put(
     response = response,
 )
 
+@HttpApiMockRegistryDsl
 public fun HttpApiMockRegistry.put(
     path: String? = null,
     scheme: String? = null,
@@ -557,6 +588,7 @@ public fun HttpApiMockRegistry.put(
     response = response,
 )
 
+@HttpApiMockRegistryDsl
 public fun HttpApiMockRegistry.put(
     path: String? = null,
     scheme: String? = null,
@@ -585,6 +617,7 @@ public fun HttpApiMockRegistry.put(
     ),
 )
 
+@HttpApiMockRegistryDsl
 public fun HttpApiMockRegistry.put(
     path: String? = null,
     scheme: String? = null,
@@ -613,6 +646,7 @@ public fun HttpApiMockRegistry.put(
     ),
 )
 
+@HttpApiMockRegistryDsl
 public fun HttpApiMockRegistry.put(
     url: HttpUrl,
     headers: Headers? = null,
@@ -626,6 +660,7 @@ public fun HttpApiMockRegistry.put(
     response = response,
 )
 
+@HttpApiMockRegistryDsl
 public fun HttpApiMockRegistry.put(
     url: HttpUrl,
     headers: Headers? = null,
@@ -639,6 +674,7 @@ public fun HttpApiMockRegistry.put(
     response = response,
 )
 
+@HttpApiMockRegistryDsl
 public fun HttpApiMockRegistry.put(
     url: HttpUrl,
     headers: Headers? = null,
@@ -658,6 +694,7 @@ public fun HttpApiMockRegistry.put(
     ),
 )
 
+@HttpApiMockRegistryDsl
 public fun HttpApiMockRegistry.put(
     url: HttpUrl,
     headers: Headers? = null,
@@ -677,6 +714,7 @@ public fun HttpApiMockRegistry.put(
     ),
 )
 
+@HttpApiMockRegistryDsl
 public fun HttpApiMockRegistry.patch(
     path: String? = null,
     scheme: String? = null,
@@ -699,6 +737,7 @@ public fun HttpApiMockRegistry.patch(
     response = response,
 )
 
+@HttpApiMockRegistryDsl
 public fun HttpApiMockRegistry.patch(
     path: String? = null,
     scheme: String? = null,
@@ -721,6 +760,7 @@ public fun HttpApiMockRegistry.patch(
     response = response,
 )
 
+@HttpApiMockRegistryDsl
 public fun HttpApiMockRegistry.patch(
     path: String? = null,
     scheme: String? = null,
@@ -749,6 +789,7 @@ public fun HttpApiMockRegistry.patch(
     ),
 )
 
+@HttpApiMockRegistryDsl
 public fun HttpApiMockRegistry.patch(
     path: String? = null,
     scheme: String? = null,
@@ -777,6 +818,7 @@ public fun HttpApiMockRegistry.patch(
     ),
 )
 
+@HttpApiMockRegistryDsl
 public fun HttpApiMockRegistry.patch(
     url: HttpUrl,
     headers: Headers? = null,
@@ -790,6 +832,7 @@ public fun HttpApiMockRegistry.patch(
     response = response,
 )
 
+@HttpApiMockRegistryDsl
 public fun HttpApiMockRegistry.patch(
     url: HttpUrl,
     headers: Headers? = null,
@@ -803,6 +846,7 @@ public fun HttpApiMockRegistry.patch(
     response = response,
 )
 
+@HttpApiMockRegistryDsl
 public fun HttpApiMockRegistry.patch(
     url: HttpUrl,
     headers: Headers? = null,
@@ -822,6 +866,7 @@ public fun HttpApiMockRegistry.patch(
     ),
 )
 
+@HttpApiMockRegistryDsl
 public fun HttpApiMockRegistry.patch(
     url: HttpUrl,
     headers: Headers? = null,
@@ -841,6 +886,7 @@ public fun HttpApiMockRegistry.patch(
     ),
 )
 
+@HttpApiMockRegistryDsl
 public fun HttpApiMockRegistry.head(
     path: String? = null,
     scheme: String? = null,
@@ -863,6 +909,7 @@ public fun HttpApiMockRegistry.head(
     response = response,
 )
 
+@HttpApiMockRegistryDsl
 public fun HttpApiMockRegistry.head(
     path: String? = null,
     scheme: String? = null,
@@ -885,6 +932,7 @@ public fun HttpApiMockRegistry.head(
     response = response,
 )
 
+@HttpApiMockRegistryDsl
 public fun HttpApiMockRegistry.head(
     path: String? = null,
     scheme: String? = null,
@@ -913,6 +961,7 @@ public fun HttpApiMockRegistry.head(
     ),
 )
 
+@HttpApiMockRegistryDsl
 public fun HttpApiMockRegistry.head(
     path: String? = null,
     scheme: String? = null,
@@ -941,6 +990,7 @@ public fun HttpApiMockRegistry.head(
     ),
 )
 
+@HttpApiMockRegistryDsl
 public fun HttpApiMockRegistry.head(
     url: HttpUrl,
     headers: Headers? = null,
@@ -954,6 +1004,7 @@ public fun HttpApiMockRegistry.head(
     response = response,
 )
 
+@HttpApiMockRegistryDsl
 public fun HttpApiMockRegistry.head(
     url: HttpUrl,
     headers: Headers? = null,
@@ -967,6 +1018,7 @@ public fun HttpApiMockRegistry.head(
     response = response,
 )
 
+@HttpApiMockRegistryDsl
 public fun HttpApiMockRegistry.head(
     url: HttpUrl,
     headers: Headers? = null,
@@ -986,6 +1038,7 @@ public fun HttpApiMockRegistry.head(
     ),
 )
 
+@HttpApiMockRegistryDsl
 public fun HttpApiMockRegistry.head(
     url: HttpUrl,
     headers: Headers? = null,
@@ -1005,6 +1058,7 @@ public fun HttpApiMockRegistry.head(
     ),
 )
 
+@HttpApiMockRegistryDsl
 public fun HttpApiMockRegistry.delete(
     path: String? = null,
     scheme: String? = null,
@@ -1027,6 +1081,7 @@ public fun HttpApiMockRegistry.delete(
     response = response,
 )
 
+@HttpApiMockRegistryDsl
 public fun HttpApiMockRegistry.delete(
     path: String? = null,
     scheme: String? = null,
@@ -1049,6 +1104,7 @@ public fun HttpApiMockRegistry.delete(
     response = response,
 )
 
+@HttpApiMockRegistryDsl
 public fun HttpApiMockRegistry.delete(
     path: String? = null,
     scheme: String? = null,
@@ -1077,6 +1133,7 @@ public fun HttpApiMockRegistry.delete(
     ),
 )
 
+@HttpApiMockRegistryDsl
 public fun HttpApiMockRegistry.delete(
     path: String? = null,
     scheme: String? = null,
@@ -1105,6 +1162,7 @@ public fun HttpApiMockRegistry.delete(
     ),
 )
 
+@HttpApiMockRegistryDsl
 public fun HttpApiMockRegistry.delete(
     url: HttpUrl,
     headers: Headers? = null,
@@ -1118,6 +1176,7 @@ public fun HttpApiMockRegistry.delete(
     response = response,
 )
 
+@HttpApiMockRegistryDsl
 public fun HttpApiMockRegistry.delete(
     url: HttpUrl,
     headers: Headers? = null,
@@ -1131,6 +1190,7 @@ public fun HttpApiMockRegistry.delete(
     response = response,
 )
 
+@HttpApiMockRegistryDsl
 public fun HttpApiMockRegistry.delete(
     url: HttpUrl,
     headers: Headers? = null,
@@ -1150,6 +1210,7 @@ public fun HttpApiMockRegistry.delete(
     ),
 )
 
+@HttpApiMockRegistryDsl
 public fun HttpApiMockRegistry.delete(
     url: HttpUrl,
     headers: Headers? = null,
