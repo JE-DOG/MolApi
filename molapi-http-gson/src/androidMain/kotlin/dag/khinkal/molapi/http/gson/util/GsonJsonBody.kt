@@ -25,3 +25,11 @@ public inline fun <reified T : Any> GsonJsonBody(
 ): JsonBody = JsonBody(
     body = gson.toJson(data),
 )
+
+public inline fun <reified T : Any> JsonBody.Companion.fromGson(
+    data: T,
+    gson: Gson = Gson(),
+): JsonBody = GsonJsonBody(
+    data = data,
+    gson = gson,
+)

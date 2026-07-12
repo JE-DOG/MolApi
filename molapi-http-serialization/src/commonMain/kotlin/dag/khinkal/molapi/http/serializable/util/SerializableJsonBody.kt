@@ -25,3 +25,11 @@ public inline fun <reified T : Any> JsonHttpResponse(
     ),
     statusCode = statusCode,
 )
+
+public inline fun <reified T : Any> JsonBody.Companion.fromSerializable(
+    body: T,
+    json: Json = Json,
+): JsonBody = SerializableJsonBody(
+    body = body,
+    json = json,
+)
