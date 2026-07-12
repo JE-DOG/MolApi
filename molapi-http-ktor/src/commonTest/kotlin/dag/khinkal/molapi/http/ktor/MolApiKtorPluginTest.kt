@@ -30,7 +30,11 @@ class MolApiKtorPluginTest {
     fun returnsMockResponseWhenRegistryFindsMatch() = runTest {
         var realRequestCount = 0
         val registry = HttpInMemoryApiMockRegistry().apply {
-            get("https://some.com/tasks") {
+            get(
+                scheme = "https",
+                host = "some.com",
+                path = "/tasks",
+            ) {
                 HttpResponse(
                     headers = Headers.empty(),
                     body = JsonBody("""{"tasks":[]}"""),
@@ -62,7 +66,11 @@ class MolApiKtorPluginTest {
     fun returnsMockResponseForHeadRequest() = runTest {
         var realRequestCount = 0
         val registry = HttpInMemoryApiMockRegistry().apply {
-            head("https://some.com/tasks") {
+            head(
+                scheme = "https",
+                host = "some.com",
+                path = "/tasks",
+            ) {
                 HttpResponse(statusCode = 204)
             }
         }
@@ -90,7 +98,11 @@ class MolApiKtorPluginTest {
     fun mockedResponsePassesThroughReceivePipeline() = runTest {
         var observedStatusCode: Int? = null
         val registry = HttpInMemoryApiMockRegistry().apply {
-            get("https://some.com/tasks") {
+            get(
+                scheme = "https",
+                host = "some.com",
+                path = "/tasks",
+            ) {
                 HttpResponse(
                     body = JsonBody("""{"tasks":[]}"""),
                     statusCode = 203,
@@ -148,7 +160,9 @@ class MolApiKtorPluginTest {
     fun matchesRequestBodyWhenKtorRequestHasTextBody() = runTest {
         val registry = HttpInMemoryApiMockRegistry().apply {
             post(
-                "https://some.com/tasks",
+                scheme = "https",
+                host = "some.com",
+                path = "/tasks",
                 body = JsonBody("{}"),
             ) {
                 HttpResponse(

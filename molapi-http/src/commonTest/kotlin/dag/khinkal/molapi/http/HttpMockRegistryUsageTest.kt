@@ -7,6 +7,7 @@ import dag.khinkal.molapi.http.model.Headers
 import dag.khinkal.molapi.http.model.HttpMethod
 import dag.khinkal.molapi.http.model.HttpRequest
 import dag.khinkal.molapi.http.model.HttpResponse
+import dag.khinkal.molapi.http.model.HttpUrl
 import dag.khinkal.molapi.http.model.JsonBody
 import dag.khinkal.molapi.http.registry.HttpInMemoryApiMockRegistry
 import kotlin.test.Test
@@ -16,7 +17,13 @@ class HttpMockRegistryUsageTest {
 
     @Test
     fun baseHttpApiMockGeneratesIdFromMatcherAndResponse() {
-        val matcher = BaseHttpRequestMatcher(url = "https://some.com/tasks")
+        val matcher = BaseHttpRequestMatcher(
+            url = HttpUrl(
+                scheme = "https",
+                host = "some.com",
+                path = "/tasks",
+            ),
+        )
         val response = HttpResponse()
 
         val mock = BaseHttpApiMock(
@@ -30,7 +37,12 @@ class HttpMockRegistryUsageTest {
     @Test
     fun findsRegisteredHttpMock() {
         val request = HttpRequest(
-            url = "https://some.com/tasks",
+            url = HttpUrl(
+                scheme = "https",
+                host = "some.com",
+                port = 443,
+                path = "/tasks",
+            ),
             headers = Headers.empty(),
             body = JsonBody("{}"),
             method = HttpMethod.GET
@@ -44,7 +56,7 @@ class HttpMockRegistryUsageTest {
 
         val mock = BaseHttpApiMock(
             matcher = BaseHttpRequestMatcher(
-                url = "https://some.com/tasks",
+                url = HttpUrl(path = "/tasks"),
                 method = HttpMethod.GET,
             ),
             response = response,

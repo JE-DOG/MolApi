@@ -65,7 +65,7 @@ class TodoApiTest {
     fun mockCanBeRegisteredWithJsonShortcut() = runTest {
         val registry: HttpApiMockRegistry = HttpInMemoryApiMockRegistry().apply {
             get(
-                url = "/todos",
+                path = "/todos",
                 json = """
                     [
                       {
@@ -142,7 +142,7 @@ class TodoApiTest {
     fun mockCanMatchRequestBody() = runTest {
         val registry: HttpApiMockRegistry = HttpInMemoryApiMockRegistry().apply {
             post(
-                url = "/todos",
+                path = "/todos",
                 body = JsonBody("""{"title":"new todo"}"""),
             ) {
                 JsonHttpResponse(

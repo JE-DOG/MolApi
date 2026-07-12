@@ -5,6 +5,7 @@ import dag.khinkal.molapi.http.model.HttpBody
 import dag.khinkal.molapi.http.model.HttpMethod
 import dag.khinkal.molapi.http.model.HttpRequest
 import dag.khinkal.molapi.http.model.HttpResponse
+import dag.khinkal.molapi.http.model.HttpUrl
 import dag.khinkal.molapi.http.model.JsonBody
 import dag.khinkal.molapi.http.registry.HttpInMemoryApiMockRegistry
 import kotlin.test.Test
@@ -39,7 +40,7 @@ class HttpMockRegistryDslTest {
         val body = JsonBody("""{"title":"new"}""")
 
         registry.post(
-            url = "/tasks",
+            path = "/tasks",
             headers = headers,
             body = body,
         ) {
@@ -63,7 +64,7 @@ class HttpMockRegistryDslTest {
 
         registry.http(
             method = HttpMethod.POST,
-            url = "/tasks",
+            path = "/tasks",
             response = HttpResponse(statusCode = 201),
         )
 
@@ -114,7 +115,7 @@ class HttpMockRegistryDslTest {
         val headers = Headers.jsonContent()
 
         registry.get(
-            url = "/tasks",
+            path = "/tasks",
             response = JsonBody("""{"tasks":[]}"""),
             responseHeaders = headers,
             statusCode = 206,
@@ -127,6 +128,59 @@ class HttpMockRegistryDslTest {
         assertEquals(206, response.statusCode)
     }
 
+    @Test
+    fun registersMockWithStructuredHttpUrl() {
+        val registry = testRegistry()
+        val url = HttpUrl(
+            scheme = "https",
+            host = "example.com",
+            port = 443,
+            path = "/tasks",
+            queryParameters = mapOf("status" to listOf("active")),
+        )
+
+        registry.get(url, json = """{"tasks":[]}""")
+
+        val response = registry.find(
+            HttpRequest(
+                url = url,
+                method = HttpMethod.GET,
+            ),
+        )?.response
+
+        assertEquals(JsonBody("""{"tasks":[]}"""), assertNotNull(response).body)
+    }
+
+    @Test
+    fun constructsStructuredHttpUrlFromDslParameters() {
+        val registry = testRegistry()
+        val queryParameters = mapOf("status" to listOf("active"))
+
+        registry.get(
+            scheme = "https",
+            host = "example.com",
+            port = 443,
+            path = "/tasks",
+            queryParameters = queryParameters,
+            json = """{"tasks":[]}""",
+        )
+
+        val response = registry.find(
+            HttpRequest(
+                url = HttpUrl(
+                    scheme = "https",
+                    host = "example.com",
+                    port = 443,
+                    path = "/tasks",
+                    queryParameters = queryParameters,
+                ),
+                method = HttpMethod.GET,
+            ),
+        )?.response
+
+        assertEquals(JsonBody("""{"tasks":[]}"""), assertNotNull(response).body)
+    }
+
     private fun testRegistry(): HttpInMemoryApiMockRegistry = HttpInMemoryApiMockRegistry()
 
     private fun HttpInMemoryApiMockRegistry.responseFor(
@@ -137,7 +191,7 @@ class HttpMockRegistryDslTest {
     ): HttpResponse {
         val response = find(
             HttpRequest(
-                url = url,
+                url = HttpUrl(path = url),
                 method = method,
                 headers = headers,
                 body = body,

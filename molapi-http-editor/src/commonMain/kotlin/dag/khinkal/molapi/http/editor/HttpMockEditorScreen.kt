@@ -452,7 +452,7 @@ private fun MockRow(
                     Text(
                         text = listOfNotNull(
                             mock.method?.name ?: stringResource(Res.string.any_method_button),
-                            mock.url,
+                            mock.urlText,
                         )
                             .joinToString(" "),
                         style = MaterialTheme.typography.bodyMedium,

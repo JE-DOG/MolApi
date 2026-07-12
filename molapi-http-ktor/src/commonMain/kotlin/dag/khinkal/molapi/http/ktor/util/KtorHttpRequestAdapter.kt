@@ -4,6 +4,7 @@ import dag.khinkal.molapi.http.model.Headers
 import dag.khinkal.molapi.http.model.HttpBody
 import dag.khinkal.molapi.http.model.HttpMethod
 import dag.khinkal.molapi.http.model.HttpRequest
+import dag.khinkal.molapi.http.model.HttpUrl
 import dag.khinkal.molapi.http.model.JsonBody
 import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.http.content.OutgoingContent
@@ -13,8 +14,18 @@ import io.ktor.http.HttpMethod as KtorHttpMethod
 
 public fun HttpRequestBuilder.toMolApiHttpRequestOrNull(): HttpRequest? {
     val method = method.toMolApiMethodOrNull() ?: return null
+    val requestUrl = url.build()
     return HttpRequest(
-        url = url.buildString(),
+        url = HttpUrl(
+            scheme = requestUrl.protocol.name,
+            host = requestUrl.host,
+            port = requestUrl.port,
+            path = requestUrl.encodedPath.ifEmpty { "/" },
+            queryParameters = requestUrl.parameters.entries()
+                .associate { (name, values) ->
+                    name to values.toList()
+                },
+        ),
         headers = headers.build().toMolApiHeaders(),
         body = body.toMolApiBody(),
         method = method

@@ -4,6 +4,7 @@ import dag.khinkal.molapi.http.assets.AssetJsonBody
 import dag.khinkal.molapi.http.model.HttpMethod
 import dag.khinkal.molapi.http.model.HttpRequest
 import dag.khinkal.molapi.http.model.HttpResponse
+import dag.khinkal.molapi.http.model.HttpUrl
 import dag.khinkal.molapi.http.model.JsonBody
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -41,7 +42,12 @@ class AssetJsonBodyTest {
         )
 
         val request = HttpRequest(
-            url = "https://some.com/tasks",
+            url = HttpUrl(
+                scheme = "https",
+                host = "some.com",
+                port = 443,
+                path = "/tasks",
+            ),
             method = HttpMethod.POST,
             body = requestBody,
         )

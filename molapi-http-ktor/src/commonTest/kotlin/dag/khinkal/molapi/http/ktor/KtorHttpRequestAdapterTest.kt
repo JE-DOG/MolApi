@@ -2,6 +2,7 @@ package dag.khinkal.molapi.http.ktor
 
 import dag.khinkal.molapi.http.ktor.util.toMolApiHttpRequestOrNull
 import dag.khinkal.molapi.http.model.HttpMethod
+import dag.khinkal.molapi.http.model.HttpUrl
 import dag.khinkal.molapi.http.model.JsonBody
 import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.client.request.headers
@@ -19,8 +20,8 @@ class KtorHttpRequestAdapterTest {
     @Test
     fun mapsSupportedKtorRequestToMolApiRequest() {
         val builder = HttpRequestBuilder().apply {
-            url("https://some.com/tasks")
-            method = HttpMethod.Post
+            url("https://some.com/tasks?tag=one&tag=one&tag=two&page=2")
+            method = KtorHttpMethod.Post
             contentType(ContentType.Application.Json)
             headers {
                 append(HttpHeaders.Accept, "application/json")
@@ -30,7 +31,19 @@ class KtorHttpRequestAdapterTest {
 
         val request = builder.toMolApiHttpRequestOrNull()
 
-        assertEquals("https://some.com/tasks", request?.url)
+        assertEquals(
+            HttpUrl(
+                scheme = "https",
+                host = "some.com",
+                port = 443,
+                path = "/tasks",
+                queryParameters = mapOf(
+                    "tag" to listOf("one", "one", "two"),
+                    "page" to listOf("2"),
+                ),
+            ),
+            request?.url,
+        )
         assertEquals(HttpMethod.POST, request?.method)
         assertEquals(JsonBody("{}"), request?.body)
         assertEquals(setOf("application/json"), request?.headers?.values?.get(HttpHeaders.Accept))

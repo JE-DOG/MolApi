@@ -40,17 +40,18 @@ Create an HTTP registry and register mocks through the DSL:
 import dag.khinkal.molapi.http.dsl.get
 import dag.khinkal.molapi.http.dsl.post
 import dag.khinkal.molapi.http.model.Headers
+import dag.khinkal.molapi.http.model.HttpUrl
 import dag.khinkal.molapi.http.model.JsonBody
 import dag.khinkal.molapi.http.registry.HttpInMemoryApiMockRegistry
 
 val registry = HttpInMemoryApiMockRegistry().apply {
     get(
-        url = "/todos",
+        path = "/todos",
         json = """[{"id":1,"title":"from molapi","completed":false}]""",
     )
 
     post(
-        url = "/todos",
+        url = HttpUrl(path = "/todos"),
         headers = Headers.jsonContent(),
         body = JsonBody("""{"title":"new"}"""),
         json = """{"id":2,"title":"new","completed":false}""",
@@ -62,7 +63,12 @@ val registry = HttpInMemoryApiMockRegistry().apply {
 The HTTP DSL supports `get`, `post`, `put`, `patch`, `head`, `delete`, and generic `http` mocks.
 Each registered mock stores a matcher and a response:
 
-- URL matching uses `request.url.contains(configuredUrl)`.
+- URLs are structured as `HttpUrl` components: scheme, host, effective port, encoded path and
+  order-independent query parameters.
+- Configured scheme and host use case-insensitive equality, port uses equality, and path keeps
+  substring matching. Unspecified components are ignored.
+- Configured query parameter names and their value sets must match; additional request query names
+  are allowed.
 - Method, headers and body matching use exact equality when those fields are provided.
 - If a matcher field is `null`, that field is ignored.
 - The registry returns the first matching mock.
@@ -147,11 +153,13 @@ configured through the regular `molapi-http` API.
 
 ```kotlin
 import android.content.Context
+import android.content.res.AssetManager
 import dag.khinkal.molapi.http.assets.AssetJsonBody
 import dag.khinkal.molapi.http.dsl.post
 import dag.khinkal.molapi.http.model.Headers
+import dag.khinkal.molapi.http.model.HttpUrl
+import dag.khinkal.molapi.http.model.JsonBody
 import dag.khinkal.molapi.http.registry.HttpInMemoryApiMockRegistry
-import android.content.res.AssetManager
 
 fun createRegistry(
     context: Context,
@@ -159,21 +167,23 @@ fun createRegistry(
 ): HttpInMemoryApiMockRegistry =
     HttpInMemoryApiMockRegistry().apply {
         post(
-            url = "/todos",
+            url = HttpUrl(path = "/todos"),
             headers = Headers.jsonContent(),
             body = AssetJsonBody(context, "requests/create-todo.json"),
-            response = JsonBody.fromAssets(context, "responses/todo-created.json"),
             responseHeaders = Headers.jsonContent(),
             statusCode = 201,
-        )
+        ) {
+            JsonBody.fromAssets(context, "responses/todo-created.json")
+        }
         post(
-            url = "/todos",
+            url = HttpUrl(path = "/todos"),
             headers = Headers.jsonContent(),
             body = AssetJsonBody(assetManager, "requests/create-todo.json"),
-            response = JsonBody.fromAssets(assetManager, "responses/todo-created.json"),
             responseHeaders = Headers.jsonContent(),
             statusCode = 201,
-        )
+        ) {
+            JsonBody.fromAssets(assetManager, "responses/todo-created.json")
+        }
     }
 ```
 

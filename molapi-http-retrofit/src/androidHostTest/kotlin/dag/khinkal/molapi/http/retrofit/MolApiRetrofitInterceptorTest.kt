@@ -24,7 +24,11 @@ class MolApiRetrofitInterceptorTest {
     @Test
     fun returnsMockResponseWhenRegistryFindsMatch() {
         val registry = HttpInMemoryApiMockRegistry().apply {
-            get("https://some.com/tasks/42") {
+            get(
+                scheme = "https",
+                host = "some.com",
+                path = "/tasks/42",
+            ) {
                 GsonHttpResponse(
                     headers = Headers(
                         mapOf("Content-Type" to setOf("application/json")),
@@ -69,7 +73,9 @@ class MolApiRetrofitInterceptorTest {
     fun matchesRequestBodyWhenRetrofitRequestHasJsonBody() {
         val registry = HttpInMemoryApiMockRegistry().apply {
             post(
-                url = "https://some.com/tasks",
+                scheme = "https",
+                host = "some.com",
+                path = "/tasks",
                 body = JsonBody("""{"title":"new"}"""),
             ) {
                 GsonHttpResponse(

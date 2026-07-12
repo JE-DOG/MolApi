@@ -5,24 +5,23 @@ import dag.khinkal.molapi.http.model.Headers
 import dag.khinkal.molapi.http.model.HttpBody
 import dag.khinkal.molapi.http.model.HttpMethod
 import dag.khinkal.molapi.http.model.HttpRequest
-import dag.khinkal.molapi.http.model.HttpUrl
-import dag.khinkal.molapi.http.util.matches
+import dag.khinkal.molapi.http.util.toRawUrl
 
-public open class BaseHttpRequestMatcher(
-    public val url: HttpUrl? = null,
+public class RawHttpUrlRequestMatcher(
+    public val rawUrl: String,
     public val method: HttpMethod? = null,
     public val body: HttpBody? = null,
     public val headers: Headers? = null,
 ) : ApiRequestMatcher<HttpRequest> {
 
     public override fun matches(request: HttpRequest): Boolean {
-        if (url != null && !url.matches(request.url)) {
+        if (method != null && request.method != method) {
+            return false
+        }
+        if (!request.url.toRawUrl().contains(rawUrl)) {
             return false
         }
         if (headers != null && request.headers != headers) {
-            return false
-        }
-        if (method != null && request.method != method) {
             return false
         }
         if (body != null && request.body != body) {

@@ -8,17 +8,19 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dag.khinkal.molapi.core.matcher.ApiRequestMatcher
 import dag.khinkal.molapi.core.model.ApiMock
 import dag.khinkal.molapi.http.matcher.BaseHttpRequestMatcher
+import dag.khinkal.molapi.http.matcher.RawHttpUrlRequestMatcher
 import dag.khinkal.molapi.http.model.Headers
 import dag.khinkal.molapi.http.model.HttpBody
 import dag.khinkal.molapi.http.model.HttpMethod
 import dag.khinkal.molapi.http.model.HttpRequest
 import dag.khinkal.molapi.http.model.HttpResponse
+import dag.khinkal.molapi.http.model.HttpUrl
 import dag.khinkal.molapi.http.model.JsonBody
 import dag.khinkal.molapi.http.registry.HttpApiMockRegistry
 
 internal data class HttpMockEditorMock(
     val id: Any,
-    val url: String?,
+    val urlText: String?,
     val method: HttpMethod?,
     val requestHeaders: String?,
     val requestBody: String?,
@@ -122,8 +124,8 @@ internal class HttpMockEditorState(
             .takeIf { body -> body.isNotBlank() }
             ?.let(::JsonBody)
         registry.add(
-            matcher = BaseHttpRequestMatcher(
-                url = draftMatcherUrl.trim().takeIf { url -> url.isNotEmpty() },
+            matcher = RawHttpUrlRequestMatcher(
+                rawUrl = draftMatcherUrl.trim(),
                 method = draftMatcherMethod,
                 body = requestBody,
                 headers = matcherHeaders,
@@ -193,14 +195,15 @@ internal class HttpMockEditorState(
 
 private fun ApiMock<HttpRequest, *, HttpResponse, *>.toEditorMock(): HttpMockEditorMock {
     val baseMatcher = matcher as? BaseHttpRequestMatcher
+    val rawUrlMatcher = matcher as? RawHttpUrlRequestMatcher
     val httpResponse = response
 
     return HttpMockEditorMock(
         id = id,
-        url = baseMatcher?.url,
-        method = baseMatcher?.method,
-        requestHeaders = baseMatcher?.headers.asText(),
-        requestBody = baseMatcher?.body?.asText(),
+        urlText = rawUrlMatcher?.rawUrl ?: baseMatcher?.url?.asDescription(),
+        method = rawUrlMatcher?.method ?: baseMatcher?.method,
+        requestHeaders = (rawUrlMatcher?.headers ?: baseMatcher?.headers).asText(),
+        requestBody = (rawUrlMatcher?.body ?: baseMatcher?.body).asText(),
         responseHeaders = httpResponse.headers.asText(),
         statusCode = httpResponse.statusCode,
         responseBody = httpResponse.body.asText(),
@@ -209,7 +212,7 @@ private fun ApiMock<HttpRequest, *, HttpResponse, *>.toEditorMock(): HttpMockEdi
 }
 
 private fun HttpMockEditorMock.searchText(): String = listOfNotNull(
-    url,
+    urlText,
     method?.name ?: "ANY",
     requestHeaders,
     requestBody,
@@ -228,3 +231,23 @@ private fun HttpBody?.asText(): String? = when (this) {
     is JsonBody -> body
     else -> toString()
 }
+
+private fun HttpUrl.asDescription(): String = buildList {
+    scheme?.let { value -> add("scheme=$value") }
+    host?.let { value -> add("host=$value") }
+    port?.let { value -> add("port=$value") }
+    path?.let { value -> add("path=$value") }
+    queryParameters
+        .entries
+        .sortedBy { entry -> entry.key }
+        .forEach { (name, values) ->
+            add(
+                values
+                    .sorted()
+                    .joinToString(
+                        prefix = "query[$name]=[",
+                        postfix = "]",
+                    ),
+            )
+        }
+}.joinToString(separator = " ")

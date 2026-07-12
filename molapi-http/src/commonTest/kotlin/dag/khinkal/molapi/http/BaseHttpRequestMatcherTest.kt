@@ -5,6 +5,7 @@ import dag.khinkal.molapi.http.model.Headers
 import dag.khinkal.molapi.http.model.HttpBody
 import dag.khinkal.molapi.http.model.HttpMethod
 import dag.khinkal.molapi.http.model.HttpRequest
+import dag.khinkal.molapi.http.model.HttpUrl
 import dag.khinkal.molapi.http.model.JsonBody
 import kotlin.test.Test
 import kotlin.test.assertFalse
@@ -13,19 +14,66 @@ import kotlin.test.assertTrue
 class BaseHttpRequestMatcherTest {
 
     @Test
-    fun matchesByUrl() {
-        val matcher = BaseHttpRequestMatcher(url = "https://some.com/tasks")
+    fun matchesByUrlComponents() {
+        val matcher = BaseHttpRequestMatcher(
+            url = HttpUrl(
+                scheme = "HTTPS",
+                host = "SOME.COM",
+                port = 443,
+                path = "/tasks",
+            ),
+        )
 
-        assertTrue(matcher.matches(testRequest(url = "https://some.com/tasks")))
-        assertFalse(matcher.matches(testRequest(url = "https://some.com/users")))
+        assertTrue(matcher.matches(testRequest()))
+        assertFalse(matcher.matches(testRequest(url = testUrl(host = "other.com"))))
+        assertFalse(matcher.matches(testRequest(url = testUrl(port = 8443))))
+        assertFalse(matcher.matches(testRequest(url = testUrl(path = "/users"))))
     }
 
     @Test
     fun matchesByUrlPart() {
-        val matcher = BaseHttpRequestMatcher(url = "/tasks/")
+        val matcher = BaseHttpRequestMatcher(url = HttpUrl(path = "/tasks/"))
 
-        assertTrue(matcher.matches(testRequest(url = "https://some.com/tasks/42")))
-        assertFalse(matcher.matches(testRequest(url = "https://some.com/users/42")))
+        assertTrue(matcher.matches(testRequest(url = testUrl(path = "/tasks/42"))))
+        assertFalse(matcher.matches(testRequest(url = testUrl(path = "/users/42"))))
+    }
+
+    @Test
+    fun matchesConfiguredQueryParametersWithDuplicatesAndExtraNames() {
+        val matcher = BaseHttpRequestMatcher(
+            url = HttpUrl(
+                queryParameters = mapOf(
+                    "filter" to listOf("active", "active", "owned"),
+                    "page" to listOf("2"),
+                ),
+            ),
+        )
+
+        assertTrue(
+            matcher.matches(
+                testRequest(
+                    url = testUrl(
+                        queryParameters = linkedMapOf(
+                            "page" to listOf("2"),
+                            "tracking" to listOf("enabled"),
+                            "filter" to listOf("active", "active", "owned"),
+                        ),
+                    ),
+                ),
+            ),
+        )
+        assertFalse(
+            matcher.matches(
+                testRequest(
+                    url = testUrl(
+                        queryParameters = mapOf(
+                            "page" to listOf("2"),
+                            "filter" to listOf("active", "owned"),
+                        ),
+                    ),
+                ),
+            ),
+        )
     }
 
     @Test
@@ -52,7 +100,7 @@ class BaseHttpRequestMatcherTest {
         assertTrue(
             matcher.matches(
                 testRequest(
-                    url = "https://other.com/tasks",
+                    url = testUrl(host = "other.com"),
                     body = JsonBody("""{"tasks":[]}"""),
                     method = HttpMethod.DELETE
                 )
@@ -61,7 +109,7 @@ class BaseHttpRequestMatcherTest {
     }
 
     private fun testRequest(
-        url: String = "https://some.com/tasks",
+        url: HttpUrl = testUrl(),
         headers: Headers? = Headers.empty(),
         body: HttpBody = JsonBody("{}"),
         method: HttpMethod = HttpMethod.GET
@@ -71,4 +119,21 @@ class BaseHttpRequestMatcherTest {
         body = body,
         method = method
     )
+
+    private companion object {
+
+        fun testUrl(
+            scheme: String = "https",
+            host: String = "some.com",
+            port: Int = 443,
+            path: String = "/tasks",
+            queryParameters: Map<String, List<String>> = emptyMap(),
+        ): HttpUrl = HttpUrl(
+            scheme = scheme,
+            host = host,
+            port = port,
+            path = path,
+            queryParameters = queryParameters,
+        )
+    }
 }
