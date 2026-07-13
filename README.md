@@ -32,20 +32,18 @@ Then add only the modules your project needs. For a Kotlin Multiplatform project
 modules in `commonMain` and Android-only adapters in `androidMain`:
 
 ```kotlin
-val molapiVersion = "1.0.0-Alpha"
-
 kotlin {
     sourceSets {
         commonMain.dependencies {
-            implementation("io.github.je-dog:molapi-http:$molapiVersion")
-            implementation("io.github.je-dog:molapi-http-ktor:$molapiVersion")
-            implementation("io.github.je-dog:molapi-http-serialization:$molapiVersion")
+            implementation("io.github.je-dog:molapi-http:<latest_version>")
+            implementation("io.github.je-dog:molapi-http-ktor:<latest_version>")
+            implementation("io.github.je-dog:molapi-http-serialization:<latest_version>")
         }
 
         androidMain.dependencies {
-            implementation("io.github.je-dog:molapi-http-retrofit:$molapiVersion")
-            implementation("io.github.je-dog:molapi-http-gson:$molapiVersion")
-            implementation("io.github.je-dog:molapi-http-android-assets:$molapiVersion")
+            implementation("io.github.je-dog:molapi-http-retrofit:<latest_version>")
+            implementation("io.github.je-dog:molapi-http-gson:<latest_version>")
+            implementation("io.github.je-dog:molapi-http-android-assets:<latest_version>")
         }
     }
 }
@@ -54,30 +52,100 @@ kotlin {
 For a regular Android Gradle module, add dependencies through the usual `dependencies` block:
 
 ```kotlin
-val molapiVersion = "1.0.0-Alpha"
-
 dependencies {
-    implementation("io.github.je-dog:molapi-http:$molapiVersion")
-    implementation("io.github.je-dog:molapi-http-retrofit:$molapiVersion")
+    implementation("io.github.je-dog:molapi-http:<latest_version>")
+    implementation("io.github.je-dog:molapi-http-retrofit:<latest_version>")
 }
 ```
 
 ## Modules
 
-| Module                                           | Purpose                                                                        | Targets      |
-|--------------------------------------------------|--------------------------------------------------------------------------------|--------------|
-| `:molapi-core`                                   | Generic request, matcher, response and registry contracts.                     | Android, iOS |
-| [`:molapi-http`](#http-mocking)                  | HTTP request/response model, matchers, in-memory registry aliases and DSL.     | Android, iOS |
-| [`:molapi-http-ktor`](#ktor-client)              | Ktor Client plugin that returns a mock response before a real request is sent. | Android, iOS |
-| [`:molapi-http-serialization`](#json-helpers)    | `kotlinx.serialization` helpers for JSON HTTP bodies.                          | Android, iOS |
-| [`:molapi-room`](#persistent-registry)           | Room-backed persistent registry foundation.                                    | Android, iOS |
-| [`:molapi-http-editor`](#editor-ui)              | Compose Multiplatform screen for viewing, searching and editing HTTP mocks.    | Android, iOS |
-| [`:molapi-http-android-assets`](#android-assets) | Helps create JSON HTTP bodies from Android project assets.                     | Android      |
-| [`:molapi-http-gson`](#json-helpers)             | Gson helpers for JSON HTTP bodies.                                             | Android      |
-| [`:molapi-http-retrofit`](#retrofit-and-okhttp)  | OkHttp/Retrofit interceptor integration.                                       | Android      |
-| `:sample`                                        | Shared sample app code.                                                        | Android, iOS |
-| `:sampleAndroidApp`                              | Android sample application entry point.                                        | Android      |
-| `SampleIosApp/`                                  | iOS sample application entry point.                                            | iOS          |
+<div style="overflow-x: auto;">
+<table>
+  <thead>
+    <tr>
+      <th>Module</th>
+      <th>Maven Central</th>
+      <th>Purpose</th>
+      <th>Targets</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>:molapi-core</code></td>
+      <td><a href="https://central.sonatype.com/artifact/io.github.je-dog/molapi-core"><img alt="Maven Central: molapi-core" src="https://img.shields.io/maven-central/v/io.github.je-dog/molapi-core?label=molapi-core"></a></td>
+      <td>Generic request, matcher, response and registry contracts.</td>
+      <td>Android, iOS</td>
+    </tr>
+    <tr>
+      <td><a href="#http-mocking"><code>:molapi-http</code></a></td>
+      <td><a href="https://central.sonatype.com/artifact/io.github.je-dog/molapi-http"><img alt="Maven Central: molapi-http" src="https://img.shields.io/maven-central/v/io.github.je-dog/molapi-http?label=molapi-http"></a></td>
+      <td>HTTP request/response model, matchers, in-memory registry aliases and DSL.</td>
+      <td>Android, iOS</td>
+    </tr>
+    <tr>
+      <td><a href="#ktor-client"><code>:molapi-http-ktor</code></a></td>
+      <td><a href="https://central.sonatype.com/artifact/io.github.je-dog/molapi-http-ktor"><img alt="Maven Central: molapi-http-ktor" src="https://img.shields.io/maven-central/v/io.github.je-dog/molapi-http-ktor?label=molapi-http-ktor"></a></td>
+      <td>Ktor Client plugin that returns a mock response before a real request is sent.</td>
+      <td>Android, iOS</td>
+    </tr>
+    <tr>
+      <td><a href="#json-helpers"><code>:molapi-http-serialization</code></a></td>
+      <td><a href="https://central.sonatype.com/artifact/io.github.je-dog/molapi-http-serialization"><img alt="Maven Central: molapi-http-serialization" src="https://img.shields.io/maven-central/v/io.github.je-dog/molapi-http-serialization?label=molapi-http-serialization"></a></td>
+      <td><code>kotlinx.serialization</code> helpers for JSON HTTP bodies.</td>
+      <td>Android, iOS</td>
+    </tr>
+    <tr>
+      <td><a href="#persistent-registry"><code>:molapi-room</code></a></td>
+      <td><a href="https://central.sonatype.com/artifact/io.github.je-dog/molapi-room"><img alt="Maven Central: molapi-room" src="https://img.shields.io/maven-central/v/io.github.je-dog/molapi-room?label=molapi-room"></a></td>
+      <td>Room-backed persistent registry foundation.</td>
+      <td>Android, iOS</td>
+    </tr>
+    <tr>
+      <td><a href="#editor-ui"><code>:molapi-http-editor</code></a></td>
+      <td><a href="https://central.sonatype.com/artifact/io.github.je-dog/molapi-http-editor"><img alt="Maven Central: molapi-http-editor" src="https://img.shields.io/maven-central/v/io.github.je-dog/molapi-http-editor?label=molapi-http-editor"></a></td>
+      <td>Compose Multiplatform screen for viewing, searching and editing HTTP mocks.</td>
+      <td>Android, iOS</td>
+    </tr>
+    <tr>
+      <td><a href="#android-assets"><code>:molapi-http-android-assets</code></a></td>
+      <td><a href="https://central.sonatype.com/artifact/io.github.je-dog/molapi-http-android-assets"><img alt="Maven Central: molapi-http-android-assets" src="https://img.shields.io/maven-central/v/io.github.je-dog/molapi-http-android-assets?label=molapi-http-android-assets"></a></td>
+      <td>Helps create JSON HTTP bodies from Android project assets.</td>
+      <td>Android</td>
+    </tr>
+    <tr>
+      <td><a href="#json-helpers"><code>:molapi-http-gson</code></a></td>
+      <td><a href="https://central.sonatype.com/artifact/io.github.je-dog/molapi-http-gson"><img alt="Maven Central: molapi-http-gson" src="https://img.shields.io/maven-central/v/io.github.je-dog/molapi-http-gson?label=molapi-http-gson"></a></td>
+      <td>Gson helpers for JSON HTTP bodies.</td>
+      <td>Android</td>
+    </tr>
+    <tr>
+      <td><a href="#retrofit-and-okhttp"><code>:molapi-http-retrofit</code></a></td>
+      <td><a href="https://central.sonatype.com/artifact/io.github.je-dog/molapi-http-retrofit"><img alt="Maven Central: molapi-http-retrofit" src="https://img.shields.io/maven-central/v/io.github.je-dog/molapi-http-retrofit?label=molapi-http-retrofit"></a></td>
+      <td>OkHttp/Retrofit interceptor integration.</td>
+      <td>Android</td>
+    </tr>
+    <tr>
+      <td><code>:sample</code></td>
+      <td>Not published</td>
+      <td>Shared sample app code.</td>
+      <td>Android, iOS</td>
+    </tr>
+    <tr>
+      <td><code>:sampleAndroidApp</code></td>
+      <td>Not published</td>
+      <td>Android sample application entry point.</td>
+      <td>Android</td>
+    </tr>
+    <tr>
+      <td><code>SampleIosApp/</code></td>
+      <td>Not published</td>
+      <td>iOS sample application entry point.</td>
+      <td>iOS</td>
+    </tr>
+  </tbody>
+</table>
+</div>
 
 ## HTTP Mocking
 
