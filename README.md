@@ -1,6 +1,5 @@
 # MolApi
 
-![Apache Maven](https://img.shields.io/badge/Apache%20Maven-C71A36?logo=Apache%20Maven&logoColor=white)
 ![Kotlin](https://camo.githubusercontent.com/7b0f7d398c2fcf5ae755c98c3d9760c3051386aa52c331e4da829018dfdfc74c/68747470733a2f2f696d672e736869656c64732e696f2f62616467652f4b6f746c696e2d3746353246463f7374796c653d666f722d7468652d6261646765266c6f676f3d6b6f746c696e266c6f676f436f6c6f723d7768697465)
 
 MolApi is a Kotlin Multiplatform toolkit for registering API mocks and resolving incoming requests
