@@ -1,5 +1,7 @@
 # MolApi
 
+[![Maven Central](https://img.shields.io/maven-central/v/io.github.je-dog/molapi-http?label=Maven%20Central)](https://central.sonatype.com/artifact/io.github.je-dog/molapi-http)
+
 MolApi is a Kotlin Multiplatform toolkit for registering API mocks and resolving incoming requests
 against them. The core idea is intentionally small:
 
@@ -14,6 +16,51 @@ request -> registry.find(request) -> mock.matcher.matches(request) -> mock.respo
 
 The project currently targets Android and iOS for the common library modules, with additional
 Android-only adapters where the underlying stack is Android/JVM-only.
+
+## Installation
+
+MolApi artifacts are published to Maven Central under the `io.github.je-dog` group. Add
+`mavenCentral()` to your repositories:
+
+```kotlin
+repositories {
+    mavenCentral()
+}
+```
+
+Then add only the modules your project needs. For a Kotlin Multiplatform project, keep common
+modules in `commonMain` and Android-only adapters in `androidMain`:
+
+```kotlin
+val molapiVersion = "1.0.0-Alpha"
+
+kotlin {
+    sourceSets {
+        commonMain.dependencies {
+            implementation("io.github.je-dog:molapi-http:$molapiVersion")
+            implementation("io.github.je-dog:molapi-http-ktor:$molapiVersion")
+            implementation("io.github.je-dog:molapi-http-serialization:$molapiVersion")
+        }
+
+        androidMain.dependencies {
+            implementation("io.github.je-dog:molapi-http-retrofit:$molapiVersion")
+            implementation("io.github.je-dog:molapi-http-gson:$molapiVersion")
+            implementation("io.github.je-dog:molapi-http-android-assets:$molapiVersion")
+        }
+    }
+}
+```
+
+For a regular Android Gradle module, add dependencies through the usual `dependencies` block:
+
+```kotlin
+val molapiVersion = "1.0.0-Alpha"
+
+dependencies {
+    implementation("io.github.je-dog:molapi-http:$molapiVersion")
+    implementation("io.github.je-dog:molapi-http-retrofit:$molapiVersion")
+}
+```
 
 ## Modules
 
