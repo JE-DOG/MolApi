@@ -9,8 +9,7 @@ public interface ReadApiMockRegistry<
         Request : ApiRequest,
         Matcher : ApiRequestMatcher<Request>,
         Response : ApiResponse,
-        Id : Any,
         > {
 
-    public fun find(request: Request): ApiMock<Request, Matcher, Response, Id>?
+    public fun find(request: Request): ApiMock<Request, Matcher, Response>?
 }

@@ -6,10 +6,9 @@ public interface ApiMock<
         Request : ApiRequest,
         Matcher : ApiRequestMatcher<Request>,
         Response : ApiResponse,
-        out Id : Any,
         > {
 
-    public val id: Id
+    public val id: String
     public val matcher: Matcher
     public val response: Response
 }

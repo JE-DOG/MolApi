@@ -83,7 +83,7 @@ internal class HttpMockEditorViewModel(
     }
 
     fun visibleMocks(
-        mocks: List<ApiMock<HttpRequest, ApiRequestMatcher<HttpRequest>, HttpResponse, Any>>,
+        mocks: List<ApiMock<HttpRequest, ApiRequestMatcher<HttpRequest>, HttpResponse>>,
     ): List<HttpMockEditorMock> {
         val queryTokens = searchQuery
             .trim()
@@ -92,7 +92,7 @@ internal class HttpMockEditorViewModel(
             .filter(String::isNotEmpty)
 
         return mocks
-            .map(ApiMock<HttpRequest, *, HttpResponse, *>::toEditorMock)
+            .map(ApiMock<HttpRequest, *, HttpResponse>::toEditorMock)
             .filter { mock ->
                 queryTokens.isEmpty() || queryTokens.all(mock.searchText()::contains)
             }
@@ -207,7 +207,7 @@ internal data class HttpMockEditorDraft(
 }
 
 internal data class HttpMockEditorMock(
-    val id: Any,
+    val id: String,
     val urlText: String?,
     val method: HttpMethod?,
     val requestHeaders: String?,
@@ -227,7 +227,7 @@ internal sealed interface HttpMockEditorDraftError {
     data object JsonDocumentReadFailed : HttpMockEditorDraftError
 }
 
-private fun ApiMock<HttpRequest, *, HttpResponse, *>.toEditorMock(): HttpMockEditorMock {
+private fun ApiMock<HttpRequest, *, HttpResponse>.toEditorMock(): HttpMockEditorMock {
     val baseMatcher = matcher as? BaseHttpRequestMatcher
     val rawUrlMatcher = matcher as? RawHttpUrlRequestMatcher
     return HttpMockEditorMock(

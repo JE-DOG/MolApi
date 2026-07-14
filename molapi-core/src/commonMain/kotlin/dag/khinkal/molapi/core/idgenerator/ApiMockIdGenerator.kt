@@ -8,8 +8,7 @@ public interface ApiMockIdGenerator<
         Request : ApiRequest,
         Matcher : ApiRequestMatcher<Request>,
         Response : ApiResponse,
-        out Id : Any,
         > {
 
-    public fun generateId(matcher: Matcher, response: Response): Id
+    public fun generateId(matcher: Matcher, response: Response): String
 }

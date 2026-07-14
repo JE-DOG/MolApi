@@ -17,15 +17,14 @@ public open class InMemoryApiMockRegistry<
         Request : ApiRequest,
         Matcher : ApiRequestMatcher<Request>,
         Response : ApiResponse,
-        Id : Any,
         >(
-    public override val idGenerator: ApiMockIdGenerator<Request, Matcher, Response, Id>,
-) : ApiMockRegistry<Request, Matcher, Response, Id> {
+    public override val idGenerator: ApiMockIdGenerator<Request, Matcher, Response>,
+) : ApiMockRegistry<Request, Matcher, Response> {
 
     private val _mocks =
-        MutableStateFlow<List<ApiMock<Request, Matcher, Response, Id>>>(emptyList())
+        MutableStateFlow<List<ApiMock<Request, Matcher, Response>>>(emptyList())
 
-    public override val mocks: StateFlow<List<ApiMock<Request, Matcher, Response, Id>>> =
+    public override val mocks: StateFlow<List<ApiMock<Request, Matcher, Response>>> =
         _mocks.asStateFlow()
 
     public override fun add(
@@ -41,7 +40,7 @@ public open class InMemoryApiMockRegistry<
         _mocks.update { it + mock }
     }
 
-    public override fun remove(id: Id): Boolean {
+    public override fun remove(id: String): Boolean {
         val currentMocks = _mocks.value
 
         val updatedMocks = _mocks.updateAndGet { mocks ->
@@ -55,6 +54,6 @@ public open class InMemoryApiMockRegistry<
         _mocks.value = emptyList()
     }
 
-    public override fun find(request: Request): ApiMock<Request, Matcher, Response, Id>? =
+    public override fun find(request: Request): ApiMock<Request, Matcher, Response>? =
         mocks.value.firstOrNull { mock -> mock.matcher.matches(request) }
 }

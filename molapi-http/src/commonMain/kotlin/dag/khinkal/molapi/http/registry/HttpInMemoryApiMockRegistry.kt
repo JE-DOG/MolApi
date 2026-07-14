@@ -1,20 +1,22 @@
 package dag.khinkal.molapi.http.registry
 
 import dag.khinkal.molapi.core.idgenerator.ApiMockIdGenerator
-import dag.khinkal.molapi.core.idgenerator.impl.HashCodeApiMockIdGenerator
+import dag.khinkal.molapi.core.idgenerator.impl.UuidApiMockIdGenerator
 import dag.khinkal.molapi.core.matcher.ApiRequestMatcher
 import dag.khinkal.molapi.core.registry.impl.InMemoryApiMockRegistry
 import dag.khinkal.molapi.http.model.HttpRequest
 import dag.khinkal.molapi.http.model.HttpResponse
 
 public class HttpInMemoryApiMockRegistry(
-    idGenerator: ApiMockIdGenerator<HttpRequest, ApiRequestMatcher<HttpRequest>, HttpResponse, Any> =
-        HashCodeApiMockIdGenerator(),
+    idGenerator: ApiMockIdGenerator<
+            HttpRequest,
+            ApiRequestMatcher<HttpRequest>,
+            HttpResponse,
+            > = UuidApiMockIdGenerator(),
 ) : InMemoryApiMockRegistry<
         HttpRequest,
         ApiRequestMatcher<HttpRequest>,
         HttpResponse,
-        Any,
         >(
     idGenerator = idGenerator,
 )

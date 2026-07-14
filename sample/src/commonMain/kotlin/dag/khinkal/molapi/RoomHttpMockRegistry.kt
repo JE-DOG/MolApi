@@ -1,11 +1,9 @@
 package dag.khinkal.molapi
 
-import dag.khinkal.molapi.core.idgenerator.impl.HashCodeApiMockIdGenerator
+import dag.khinkal.molapi.core.idgenerator.impl.UuidApiMockIdGenerator
 import dag.khinkal.molapi.core.matcher.ApiRequestMatcher
-import dag.khinkal.molapi.core.model.ApiMock
 import dag.khinkal.molapi.http.matcher.BaseHttpRequestMatcher
 import dag.khinkal.molapi.http.matcher.RawHttpUrlRequestMatcher
-import dag.khinkal.molapi.http.model.BaseHttpApiMock
 import dag.khinkal.molapi.http.model.Headers
 import dag.khinkal.molapi.http.model.HttpBody
 import dag.khinkal.molapi.http.model.HttpMethod
@@ -16,7 +14,6 @@ import dag.khinkal.molapi.http.model.JsonBody
 import dag.khinkal.molapi.http.registry.HttpApiMockRegistry
 import dag.khinkal.molapi.room.ApiMockParser
 import dag.khinkal.molapi.room.MolApiRoomDatabase
-import dag.khinkal.molapi.room.RoomApiMockRecord
 import dag.khinkal.molapi.room.RoomApiMockRegistry
 import io.ktor.http.Url
 import kotlinx.coroutines.CoroutineScope
@@ -29,7 +26,7 @@ internal fun createRoomHttpMockRegistry(
     RoomApiMockRegistry(
         database = database,
         parser = HttpRoomApiMockParser,
-        idGenerator = HashCodeApiMockIdGenerator(),
+        idGenerator = UuidApiMockIdGenerator(),
         coroutineScope = coroutineScope,
     )
 
@@ -37,7 +34,6 @@ internal object HttpRoomApiMockParser : ApiMockParser<
         HttpRequest,
         ApiRequestMatcher<HttpRequest>,
         HttpResponse,
-        Any,
         > {
 
     override fun encodeMatcher(matcher: ApiRequestMatcher<HttpRequest>): String {
@@ -97,18 +93,6 @@ internal object HttpRoomApiMockParser : ApiMockParser<
             body = value.body?.let(::JsonBody),
             headers = value.headers?.let(::Headers),
             statusCode = value.statusCode,
-        )
-    }
-
-    override fun decodeRecord(
-        record: RoomApiMockRecord,
-    ): ApiMock<HttpRequest, ApiRequestMatcher<HttpRequest>, HttpResponse, Any> {
-        val matcher = decodeMatcher(record.matcher)
-
-        return BaseHttpApiMock(
-            id = record.id.toInt(),
-            matcher = matcher,
-            response = decodeResponse(record.response),
         )
     }
 }

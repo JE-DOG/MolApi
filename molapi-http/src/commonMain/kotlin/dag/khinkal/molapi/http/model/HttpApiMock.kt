@@ -7,5 +7,4 @@ public interface HttpApiMock : ApiMock<
         HttpRequest,
         ApiRequestMatcher<HttpRequest>,
         HttpResponse,
-        Any,
         >
