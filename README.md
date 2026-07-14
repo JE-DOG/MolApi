@@ -38,6 +38,10 @@ kotlin {
             implementation("io.github.je-dog:molapi-http:<latest_version>")
             implementation("io.github.je-dog:molapi-http-ktor:<latest_version>")
             implementation("io.github.je-dog:molapi-http-serialization:<latest_version>")
+
+            // Optional: persistent mocks and Compose Multiplatform editor UI.
+            implementation("io.github.je-dog:molapi-room:<latest_version>")
+            implementation("io.github.je-dog:molapi-http-editor:<latest_version>")
         }
 
         androidMain.dependencies {
@@ -239,8 +243,23 @@ val client = HttpClient {
 }
 ```
 
-`sample/src/commonMain/kotlin/dag/khinkal/molapi/TodoApi.kt` shows the same pattern in the sample
-client configuration.
+When using the editor integration, initialize `MolApiEditor` once at application startup and pass
+its shared registry into the plugin:
+
+```kotlin
+import dag.khinkal.molapi.http.editor.MolApiEditor
+import dag.khinkal.molapi.http.ktor.plugin.MolApiKtorPlugin
+import io.ktor.client.HttpClient
+
+val client = HttpClient {
+    install(MolApiKtorPlugin) {
+        registry = MolApiEditor.registry
+    }
+}
+```
+
+`sample/src/commonMain/kotlin/dag/khinkal/molapi/TodoApi.kt` shows this pattern in the sample client
+configuration.
 
 ## Retrofit and OkHttp
 
@@ -260,6 +279,18 @@ val okHttpClient = OkHttpClient.Builder()
 
 The interceptor follows the same fallback rule as the Ktor plugin: mock match first, real request
 otherwise.
+
+When the editor is enabled, use the same shared registry:
+
+```kotlin
+import dag.khinkal.molapi.http.editor.MolApiEditor
+import dag.khinkal.molapi.http.retrofit.interceptor.addMolApiInterceptor
+import okhttp3.OkHttpClient
+
+val okHttpClient = OkHttpClient.Builder()
+    .addMolApiInterceptor(MolApiEditor.registry)
+    .build()
+```
 
 ## JSON Helpers
 
@@ -343,24 +374,76 @@ by default. Pass a `Charset` explicitly if an asset uses another encoding.
 an `ApiMockParser`. The parser owns serialization for matcher and response types, so a feature can
 decide which mock shapes are safe to persist.
 
-The sample contains an HTTP parser in
-`sample/src/commonMain/kotlin/dag/khinkal/molapi/RoomHttpMockRegistry.kt`.
+Mocks use `String` ids. The default registry id generator is `UuidApiMockIdGenerator`, so new
+records get random UUID string ids unless a custom `ApiMockIdGenerator` is supplied.
+
+For HTTP mocks, the editor module already ships the Room parser used by `MolApiEditor`.
 
 ## Editor UI
 
-`:molapi-http-editor` exposes a Compose Multiplatform `HttpMockEditorScreen`:
+`:molapi-http-editor` exposes a Compose Multiplatform `MolApiHttpMockEditorScreen` and a
+`MolApiEditor` facade. The facade owns one shared `HttpApiMockRegistry` so the editor UI and the
+network interceptor/plugin see the same mocks.
+
+Initialize the editor once at application startup.
+
+Android:
+
+```kotlin
+import android.app.Application
+import dag.khinkal.molapi.http.editor.MolApiEditor
+import dag.khinkal.molapi.http.editor.init
+
+class App : Application() {
+    override fun onCreate() {
+        super.onCreate()
+        MolApiEditor.init(this)
+    }
+}
+```
+
+iOS:
+
+```kotlin
+import dag.khinkal.molapi.http.editor.MolApiEditor
+import dag.khinkal.molapi.http.editor.init
+
+fun initializeMolApiEditor() {
+    MolApiEditor.init()
+}
+```
+
+Call the exported `initializeMolApiEditor()` from the Swift `App.init()` or another iOS application
+startup point before creating screens or HTTP clients.
 
 ```kotlin
 import androidx.compose.runtime.Composable
-import dag.khinkal.molapi.http.editor.HttpMockEditorScreen
-import dag.khinkal.molapi.http.registry.HttpApiMockRegistry
-import dag.khinkal.molapi.http.registry.HttpInMemoryApiMockRegistry
+import dag.khinkal.molapi.http.editor.MolApiHttpMockEditorScreen
 
 @Composable
-fun MockEditor(
-    registry: HttpApiMockRegistry = HttpInMemoryApiMockRegistry(),
-) {
-    HttpMockEditorScreen(registry = registry)
+fun MockEditor() {
+    MolApiHttpMockEditorScreen()
+}
+```
+
+For tests or custom dependency injection, pass an explicit registry provider:
+
+```kotlin
+import dag.khinkal.molapi.http.editor.MolApiEditor
+import dag.khinkal.molapi.http.ktor.plugin.MolApiKtorPlugin
+import io.ktor.client.HttpClient
+
+val customRegistry: HttpApiMockRegistry = CustomHttpApiMockRegistry() 
+
+val client = HttpClient {
+  install(MolApiKtorPlugin) {
+    registry = customRegistry
+  }
+}
+
+@Composable
+fun TestScreen() {
+  MolApiHttpMockEditorScreen(registry = { customRegistry })
 }
 ```
 
@@ -402,6 +485,8 @@ simulator or device.
 - Public APIs use explicit Kotlin visibility.
 - Common modules avoid platform-only APIs in `commonMain`.
 - `:molapi-http` depends on `:molapi-core` as API because HTTP public types expose core contracts.
+- Transport integrations (`:molapi-http-ktor` and `:molapi-http-retrofit`) accept a registry from
+  the caller; they do not depend on `:molapi-http-editor`.
 
 ## License
 
