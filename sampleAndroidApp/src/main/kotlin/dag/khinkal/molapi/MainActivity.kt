@@ -4,30 +4,17 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.lifecycle.lifecycleScope
+import dag.khinkal.molapi.http.editor.MolApiEditor
+import dag.khinkal.molapi.http.editor.init
 
 public class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
+        MolApiEditor.init(this)
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
 
         setContent {
-            val isMolApiEnabled = BuildConfig.DEBUG || BuildConfig.BUILD_TYPE == "beta"
-            App(
-                molApiConfig = createAndroidRoomMolApiClientConfig(
-                    context = applicationContext,
-                    isEnabled = isMolApiEnabled,
-                    coroutineScope = lifecycleScope,
-                ),
-            )
+            App()
         }
     }
-}
-
-@Preview
-@Composable
-public fun AppAndroidPreview() {
-    App()
 }

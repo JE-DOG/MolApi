@@ -45,7 +45,6 @@ kotlin {
         commonMain.dependencies {
             api(project(":molapi-http"))
             implementation(libs.compose.runtime)
-            implementation("dev.skymansandy:wiretap-ktor:1.0.0-RC15")
             implementation(libs.compose.foundation)
             implementation(libs.compose.material3)
             implementation(libs.compose.ui)
@@ -58,7 +57,7 @@ kotlin {
             implementation(libs.ktor.client.content.negotiation)
             implementation(libs.ktor.serialization.kotlinx.json)
             implementation(project(":molapi-http-ktor"))
-            implementation(project(":molapi-http-editor"))
+            api(project(":molapi-http-editor"))
             implementation(projects.molapiHttpSerialization)
             implementation(projects.molapiRoom)
         }

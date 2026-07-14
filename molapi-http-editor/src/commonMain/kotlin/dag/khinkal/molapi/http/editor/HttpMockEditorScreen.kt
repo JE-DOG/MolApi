@@ -6,7 +6,6 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MotionScheme
 import androidx.compose.runtime.Composable
@@ -16,16 +15,13 @@ import dag.khinkal.molapi.http.editor.create.CreateHttpMockScreen
 import dag.khinkal.molapi.http.editor.list.HttpMockListScreen
 import dag.khinkal.molapi.http.registry.HttpApiMockRegistry
 
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-public fun HttpMockEditorScreen(
-    registry: HttpApiMockRegistry,
+public fun MolApiHttpMockEditorScreen(
+    registry: () -> HttpApiMockRegistry = MolApiEditor::registry,
     modifier: Modifier = Modifier,
 ) {
-    val viewModel = viewModel<HttpMockEditorViewModel>(
-        key = "HttpMockEditorViewModel:${registry.hashCode()}",
-    ) {
-        HttpMockEditorViewModel(registry)
+    val viewModel = viewModel<HttpMockEditorViewModel> {
+        HttpMockEditorViewModel(registry())
     }
 
     MaterialTheme(motionScheme = MotionScheme.expressive()) {
@@ -36,7 +32,6 @@ public fun HttpMockEditorScreen(
     }
 }
 
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 internal fun HttpMockEditorScreen(
     viewModel: HttpMockEditorViewModel,

@@ -30,18 +30,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
-import dag.khinkal.molapi.http.editor.HttpMockEditorScreen
-import dag.khinkal.molapi.http.registry.HttpApiMockRegistry
+import dag.khinkal.molapi.http.editor.MolApiHttpMockEditorScreen
 import kotlinx.coroutines.launch
 
 @Composable
-public fun App(
-    molApiConfig: MolApiClientConfig = MolApiClientConfig(),
-) {
+public fun App() {
     val coroutineScope = rememberCoroutineScope()
 
     MaterialTheme {
-        val client = remember(molApiConfig) { createTodoHttpClient(molApiConfig) }
+        val client = remember { createTodoHttpClient() }
         val api = remember(client) { TodoApi(client) }
         var uiState by remember { mutableStateOf<TodoUiState>(TodoUiState.Loading) }
         var isEditorVisible by remember { mutableStateOf(false) }
@@ -61,7 +58,6 @@ public fun App(
 
         TodoScreen(
             uiState = uiState,
-            isEditorEnabled = molApiConfig.isEnabled,
             onOpenEditorClick = { isEditorVisible = true },
             onRefresh = {
                 coroutineScope.launch {
@@ -73,9 +69,8 @@ public fun App(
                 }
             },
         )
-        if (molApiConfig.isEnabled && isEditorVisible) {
+        if (isEditorVisible) {
             HttpMockEditorDialog(
-                registry = molApiConfig.registry,
                 onDismissRequest = { isEditorVisible = false },
             )
         }
@@ -91,7 +86,6 @@ private sealed interface TodoUiState {
 @Composable
 private fun TodoScreen(
     uiState: TodoUiState,
-    isEditorEnabled: Boolean,
     onOpenEditorClick: () -> Unit,
     onRefresh: () -> Unit,
     modifier: Modifier = Modifier,
@@ -120,10 +114,9 @@ private fun TodoScreen(
                 Button(onClick = onRefresh) {
                     Text("Refresh")
                 }
-                if (isEditorEnabled) {
-                    Button(onClick = onOpenEditorClick) {
-                        Text("Open editor")
-                    }
+
+                Button(onClick = onOpenEditorClick) {
+                    Text("Open editor")
                 }
             }
 
@@ -143,7 +136,6 @@ private fun TodoScreen(
 
 @Composable
 private fun HttpMockEditorDialog(
-    registry: HttpApiMockRegistry,
     onDismissRequest: () -> Unit,
 ) {
     Dialog(onDismissRequest = onDismissRequest) {
@@ -170,8 +162,8 @@ private fun HttpMockEditorDialog(
                         Text("Close")
                     }
                 }
-                HttpMockEditorScreen(
-                    registry = registry,
+
+                MolApiHttpMockEditorScreen(
                     modifier = Modifier.weight(1f),
                 )
             }
@@ -242,7 +234,6 @@ private fun TodoScreenPreview() {
                     ),
                 ),
             ),
-            isEditorEnabled = true,
             onOpenEditorClick = {},
             onRefresh = {},
         )

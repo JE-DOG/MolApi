@@ -15,7 +15,6 @@ public class MolApiRetrofitInterceptor(
             HttpRequest,
             ApiRequestMatcher<HttpRequest>,
             HttpResponse,
-            *,
             >,
 ) : Interceptor {
 
@@ -34,6 +33,5 @@ public fun OkHttpClient.Builder.addMolApiInterceptor(
             HttpRequest,
             ApiRequestMatcher<HttpRequest>,
             HttpResponse,
-            *,
             >,
 ): OkHttpClient.Builder = addInterceptor(MolApiRetrofitInterceptor(registry))

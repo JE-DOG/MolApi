@@ -56,8 +56,10 @@ public class RoomApiMockRegistry<
     public constructor(
         database: MolApiRoomDatabase,
         parser: ApiMockParser<Request, Matcher, Response>,
-        idGenerator: ApiMockIdGenerator<Request, Matcher, Response>,
-        coroutineScope: CoroutineScope,
+        idGenerator: ApiMockIdGenerator<Request, Matcher, Response> =
+            UuidApiMockIdGenerator(),
+        coroutineScope: CoroutineScope =
+            CoroutineScope(Dispatchers.IO + SupervisorJob()),
     ) : this(
         storage = DatabaseApiMockStorage(database.apiMockDao()),
         parser = parser,

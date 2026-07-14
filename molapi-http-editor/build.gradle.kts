@@ -5,6 +5,7 @@ plugins {
     alias(libs.plugins.androidMultiplatformLibrary)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
+    alias(libs.plugins.kotlinSerialization)
 }
 
 kotlin {
@@ -32,6 +33,7 @@ kotlin {
     sourceSets {
         commonMain.dependencies {
             api(project(":molapi-http"))
+            api(project(":molapi-room"))
             implementation(libs.androidx.navigation3.runtime)
             implementation(libs.compose.foundation)
             implementation(libs.compose.material3)
@@ -40,9 +42,14 @@ kotlin {
             implementation(libs.compose.ui)
             implementation(libs.androidx.lifecycle.runtimeCompose)
             implementation(libs.androidx.lifecycle.viewmodelCompose)
+            implementation(libs.kotlinx.coroutines.core)
+            implementation(libs.kotlinx.serialization.json)
         }
         androidMain.dependencies {
             implementation(libs.androidx.activity.compose)
+        }
+        iosMain.dependencies {
+            implementation(libs.androidx.sqlite.bundled)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)

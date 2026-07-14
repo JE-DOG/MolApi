@@ -20,7 +20,6 @@ public class MolApiKtorPluginConfig {
             HttpRequest,
             ApiRequestMatcher<HttpRequest>,
             HttpResponse,
-            *,
             >? = null
 }
 

@@ -1,6 +1,5 @@
-package dag.khinkal.molapi
+package dag.khinkal.molapi.http.editor
 
-import dag.khinkal.molapi.core.idgenerator.impl.UuidApiMockIdGenerator
 import dag.khinkal.molapi.core.matcher.ApiRequestMatcher
 import dag.khinkal.molapi.http.matcher.BaseHttpRequestMatcher
 import dag.khinkal.molapi.http.matcher.RawHttpUrlRequestMatcher
@@ -11,24 +10,9 @@ import dag.khinkal.molapi.http.model.HttpRequest
 import dag.khinkal.molapi.http.model.HttpResponse
 import dag.khinkal.molapi.http.model.HttpUrl
 import dag.khinkal.molapi.http.model.JsonBody
-import dag.khinkal.molapi.http.registry.HttpApiMockRegistry
 import dag.khinkal.molapi.room.ApiMockParser
-import dag.khinkal.molapi.room.MolApiRoomDatabase
-import dag.khinkal.molapi.room.RoomApiMockRegistry
-import io.ktor.http.Url
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.serialization.Serializable
-
-internal fun createRoomHttpMockRegistry(
-    database: MolApiRoomDatabase,
-    coroutineScope: CoroutineScope,
-): HttpApiMockRegistry =
-    RoomApiMockRegistry(
-        database = database,
-        parser = HttpRoomApiMockParser,
-        idGenerator = UuidApiMockIdGenerator(),
-        coroutineScope = coroutineScope,
-    )
+import kotlinx.serialization.json.Json
 
 internal object HttpRoomApiMockParser : ApiMockParser<
         HttpRequest,
@@ -36,18 +20,24 @@ internal object HttpRoomApiMockParser : ApiMockParser<
         HttpResponse,
         > {
 
+    private val json = Json {
+        ignoreUnknownKeys = true
+    }
+
     override fun encodeMatcher(matcher: ApiRequestMatcher<HttpRequest>): String {
         val value = when (matcher) {
             is BaseHttpRequestMatcher -> RoomHttpMatcher(
                 httpUrl = matcher.url?.toRoomHttpUrl(),
                 method = matcher.method?.name,
                 body = matcher.body.asJsonBodyText(),
+                headers = matcher.headers?.values,
             )
 
             is RawHttpUrlRequestMatcher -> RoomHttpMatcher(
                 rawUrl = matcher.rawUrl,
                 method = matcher.method?.name,
                 body = matcher.body.asJsonBodyText(),
+                headers = matcher.headers?.values,
             )
 
             else -> error(
@@ -56,11 +46,11 @@ internal object HttpRoomApiMockParser : ApiMockParser<
             )
         }
 
-        return AppJson.encodeToString(value)
+        return json.encodeToString(value)
     }
 
     override fun decodeMatcher(matcher: String): ApiRequestMatcher<HttpRequest> {
-        val value = AppJson.decodeFromString<RoomHttpMatcher>(matcher)
+        val value = json.decodeFromString<RoomHttpMatcher>(matcher)
         val rawUrl = value.rawUrl
 
         return if (!rawUrl.isNullOrBlank()) {
@@ -68,18 +58,20 @@ internal object HttpRoomApiMockParser : ApiMockParser<
                 rawUrl = rawUrl,
                 method = value.method?.let(HttpMethod::valueOf),
                 body = value.body?.let(::JsonBody),
+                headers = value.headers?.let(::Headers),
             )
         } else {
             BaseHttpRequestMatcher(
-                url = value.httpUrl?.toHttpUrl() ?: value.url?.toLegacyHttpUrl(),
+                url = value.httpUrl?.toHttpUrl(),
                 method = value.method?.let(HttpMethod::valueOf),
                 body = value.body?.let(::JsonBody),
+                headers = value.headers?.let(::Headers),
             )
         }
     }
 
     override fun encodeResponse(response: HttpResponse): String =
-        AppJson.encodeToString(
+        json.encodeToString(
             RoomHttpResponse(
                 body = response.body.asJsonBodyText(),
                 headers = response.headers?.values,
@@ -88,7 +80,7 @@ internal object HttpRoomApiMockParser : ApiMockParser<
         )
 
     override fun decodeResponse(response: String): HttpResponse {
-        val value = AppJson.decodeFromString<RoomHttpResponse>(response)
+        val value = json.decodeFromString<RoomHttpResponse>(response)
         return HttpResponse(
             body = value.body?.let(::JsonBody),
             headers = value.headers?.let(::Headers),
@@ -99,11 +91,11 @@ internal object HttpRoomApiMockParser : ApiMockParser<
 
 @Serializable
 private data class RoomHttpMatcher(
-    val url: String? = null,
     val httpUrl: RoomHttpUrl? = null,
     val rawUrl: String? = null,
     val method: String?,
     val body: String?,
+    val headers: Map<String, List<String>>? = null,
 )
 
 @Serializable
@@ -143,19 +135,3 @@ private fun RoomHttpUrl.toHttpUrl(): HttpUrl = HttpUrl(
     path = path,
     queryParameters = queryParameters,
 )
-
-private fun String.toLegacyHttpUrl(): HttpUrl {
-    val parsedUrl = Url(this)
-    val hasAuthority = startsWith("http://", ignoreCase = true) ||
-            startsWith("https://", ignoreCase = true)
-
-    return HttpUrl(
-        scheme = parsedUrl.protocol.name.takeIf { hasAuthority },
-        host = parsedUrl.host.takeIf { hasAuthority },
-        port = parsedUrl.port.takeIf { hasAuthority },
-        path = parsedUrl.encodedPath.ifEmpty { "/" },
-        queryParameters = parsedUrl.parameters.entries().associate { (name, values) ->
-            name to values.toList()
-        },
-    )
-}
