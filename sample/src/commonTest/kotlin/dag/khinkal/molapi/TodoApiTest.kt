@@ -34,12 +34,7 @@ class TodoApiTest {
                 )
             }
         }
-        val client = createTodoHttpClient(
-            molApiConfig = MolApiClientConfig(
-                isEnabled = true,
-                registry = registry,
-            ),
-        )
+        val client = createTodoHttpClient(registry)
         val api = TodoApi(client)
 
         try {
@@ -78,12 +73,7 @@ class TodoApiTest {
                 """.trimIndent(),
             )
         }
-        val client = createTodoHttpClient(
-            molApiConfig = MolApiClientConfig(
-                isEnabled = true,
-                registry = registry,
-            ),
-        )
+        val client = createTodoHttpClient(registry)
         val api = TodoApi(client)
 
         try {
@@ -120,12 +110,7 @@ class TodoApiTest {
                 )
             }
         }
-        val client = createTodoHttpClient(
-            molApiConfig = MolApiClientConfig(
-                isEnabled = true,
-                registry = registry,
-            ),
-        )
+        val client = createTodoHttpClient(registry)
 
         try {
             val response = client.get("https://jsonplaceholder.typicode.com/todos")
@@ -156,12 +141,7 @@ class TodoApiTest {
                 )
             }
         }
-        val client = createTodoHttpClient(
-            molApiConfig = MolApiClientConfig(
-                isEnabled = true,
-                registry = registry,
-            ),
-        )
+        val client = createTodoHttpClient(registry)
 
         try {
             val response = client.post("https://jsonplaceholder.typicode.com/todos") {

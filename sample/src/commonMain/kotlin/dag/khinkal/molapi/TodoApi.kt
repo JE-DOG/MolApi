@@ -2,6 +2,7 @@ package dag.khinkal.molapi
 
 import dag.khinkal.molapi.http.editor.MolApiEditor
 import dag.khinkal.molapi.http.ktor.plugin.MolApiKtorPlugin
+import dag.khinkal.molapi.http.registry.HttpApiMockRegistry
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
@@ -33,10 +34,12 @@ public class TodoApi(
     }
 }
 
-public fun createTodoHttpClient(): HttpClient =
+public fun createTodoHttpClient(
+    mocksRegistry: HttpApiMockRegistry = MolApiEditor.registry,
+): HttpClient =
     HttpClient {
         install(MolApiKtorPlugin) {
-            registry = MolApiEditor.registry
+            registry = mocksRegistry
         }
         install(ContentNegotiation) {
             json(AppJson)
