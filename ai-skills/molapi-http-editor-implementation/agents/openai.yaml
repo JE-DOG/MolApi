@@ -1,4 +1,4 @@
 interface:
   display_name: "MolApi HTTP Editor Implementation"
-  short_description: "Implement editor UI changes"
+  short_description: "Implement MolApi editor changes"
   default_prompt: "Use $molapi-http-editor-implementation to implement a molapi-http-editor change."

@@ -1,66 +1,95 @@
 ---
 name: molapi-http-editor-implementation
-description: Implement, modify, or review the MolApi HTTP editor Compose Multiplatform module. Use when a task touches molapi-http-editor, dag.khinkal.molapi.http.editor, HttpMockEditorScreen, HttpMockEditorState, Compose resources, Navigation3 usage, editor Gradle wiring, editor common tests, or editor UI/state behavior.
+description: Implement, modify, or review the MolApi HTTP editor Compose Multiplatform module. Use when a task touches molapi-http-editor, dag.khinkal.molapi.http.editor, MolApiEditor, MolApiHttpMockEditorScreen, HttpMockEditorViewModel, HttpRoomApiMockParser, Room-backed editor initialization, Compose resources, platform document pickers, editor Gradle wiring, tests, or UI/state behavior.
 ---
 
 # MolApi HTTP Editor Implementation
 
 ## Scope
 
-Work on `molapi-http-editor`, the Compose Multiplatform editor UI for `HttpApiMockRegistry`.
-
-## Required Context
-
-Read before editing:
-
-- `AGENTS.md`
-- `.agents/context/role-and-quality.md`
-- `.agents/context/project-structure.md`
-- `.agents/context/kmp-implementation-rules.md`
-- `.agents/context/build-and-verification.md`
-
-Inspect current local files:
-
-- `molapi-http-editor/build.gradle.kts`
-- `molapi-http-editor/src/commonMain/kotlin/dag/khinkal/molapi/http/editor/**`
-- `molapi-http-editor/src/commonMain/composeResources/**`
-- `molapi-http-editor/src/commonTest/**`
+`:molapi-http-editor` exposes a Compose Multiplatform `MolApiHttpMockEditorScreen` and a
+`MolApiEditor` facade. The facade owns one shared `HttpApiMockRegistry` so the editor UI and the
+network interceptor/plugin see the same mocks.
 
 ## Contract
 
 Preserve editor responsibilities:
 
-- `HttpMockEditorScreen(registry, modifier)` is the public UI entry point.
-- State logic should remain in `HttpMockEditorState` where possible.
+- `MolApiHttpMockEditorScreen(registry: () -> HttpApiMockRegistry = MolApiEditor::registry,
+  modifier)` is the public UI entry point.
+- `MolApiEditor` owns the shared registry and must be initialized before its default registry is
+  read. Preserve initialization from an explicit registry or `MolApiRoomDatabase`.
+- Platform `MolApiEditor.init` extensions construct the default Room database for Android and iOS.
+- State and draft behavior belong in `HttpMockEditorViewModel`; the internal
+  `HttpMockEditorScreen` renders that state.
+- `HttpRoomApiMockParser` is the editor's internal HTTP matcher/response persistence adapter.
 - UI edits create, filter, show, remove, and clear HTTP mocks through `HttpApiMockRegistry`.
-- Visible strings should come from compose resources.
+- Request and response JSON bodies can be loaded through platform document pickers.
 
-## Implementation Rules
+## Usage example
 
-- Keep UI code multiplatform; do not add Android-only APIs to common composables.
-- Keep public composables explicit and stable.
-- Do not put persistence concerns here; Room has its own module.
-- Do not implement new HTTP matching semantics in the editor; use `molapi-http` contracts.
-- Keep Compose layouts practical and test state/parsing logic outside UI when possible.
+Initialize the editor once at application startup.
 
-## Tests
+Example for Android:
 
-Prefer common tests for state logic:
+```kotlin
+import android.app.Application
+import dag.khinkal.molapi.http.editor.MolApiEditor
+import dag.khinkal.molapi.http.editor.init
 
-- draft validation
-- header parsing errors
-- status code parsing
-- create/remove/clear behavior
-- filtering behavior
-
-Run UI/compile checks when layout or resource wiring changes.
-
-## Validation
-
-Run:
-
-```bash
-rtk ./gradlew :molapi-http-editor:testAndroidHostTest :molapi-http-editor:iosSimulatorArm64Test
+class App : Application() {
+    override fun onCreate() {
+        super.onCreate()
+        MolApiEditor.init(this)
+    }
+}
 ```
 
-If sample embeds the editor, also run sample checks through `$molapi-change-validation`.
+Example for iOS:
+
+```kotlin
+import dag.khinkal.molapi.http.editor.MolApiEditor
+import dag.khinkal.molapi.http.editor.init
+
+fun initializeMolApiEditor() {
+    MolApiEditor.init()
+}
+```
+
+Call the exported `initializeMolApiEditor()` from the Swift `App.init()` or another iOS application
+startup point before creating screens or HTTP clients.
+
+```kotlin
+import androidx.compose.runtime.Composable
+import dag.khinkal.molapi.http.editor.MolApiHttpMockEditorScreen
+
+@Composable
+fun MockEditor() {
+    MolApiHttpMockEditorScreen()
+}
+```
+
+For tests or custom dependency injection, pass an explicit registry provider:
+
+```kotlin
+import dag.khinkal.molapi.http.editor.MolApiEditor
+import dag.khinkal.molapi.http.ktor.plugin.MolApiKtorPlugin
+import io.ktor.client.HttpClient
+
+val customRegistry: HttpApiMockRegistry = CustomHttpApiMockRegistry() 
+
+val client = HttpClient {
+  install(MolApiKtorPlugin) {
+    registry = customRegistry
+  }
+}
+// Or if Retrofit
+val okHttpClient = OkHttpClient.Builder()
+  .addMolApiInterceptor(customRegistry)
+  .build()
+
+@Composable
+fun TestScreen() {
+  MolApiHttpMockEditorScreen(registry = { customRegistry })
+}
+```

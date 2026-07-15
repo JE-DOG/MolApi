@@ -25,48 +25,27 @@ Inspect current local files:
 - `molapi-http-retrofit/build.gradle.kts`
 - `molapi-http-retrofit/src/androidMain/kotlin/dag/khinkal/molapi/http/retrofit/**`
 - `molapi-http-retrofit/src/androidHostTest/kotlin/dag/khinkal/molapi/http/retrofit/**`
+- current `ReadApiMockRegistry`, `HttpRequest`, `HttpUrl`, and `Headers` declarations in
+  `molapi-core` and `molapi-http`
 
 Use `ksrc --help` before inspecting OkHttp or Retrofit dependency sources.
+
+Treat current module sources and tests as authoritative when a context document lags behind the
+implemented API.
 
 ## Contract
 
 Preserve behavior:
 
 - `MolApiRetrofitInterceptor` reads the OkHttp request.
-- Convert supported OkHttp requests to MolApi `HttpRequest`.
-- Find a mock through `ReadApiMockRegistry`.
-- Return a synthetic OkHttp response when a mock exists.
-- Call `chain.proceed(request)` when conversion fails or no mock exists.
-- `OkHttpClient.Builder.addMolApiInterceptor(registry)` adds the interceptor.
+- `OkHttpClient.Builder.addMolApiInterceptor` add mocks registry.
+- Its registry type is
+  `ReadApiMockRegistry<HttpRequest, ApiRequestMatcher<HttpRequest>, HttpResponse>`.
 
-## Implementation Rules
+## Usage example
 
-- Keep all Retrofit/OkHttp code in Android source sets.
-- Do not add iOS/common targets for this module.
-- Keep public APIs Android-compatible and explicit.
-- Keep unsupported HTTP methods as pass-through.
-- Preserve request, status code, headers, media/body behavior in synthetic responses.
-
-## Tests
-
-Use Android host tests for:
-
-- interceptor returns mock response
-- interceptor proceeds when no mock exists
-- unsupported methods proceed
-- request body conversion
-- response headers/status/body conversion
-- builder extension adds the interceptor
-
-Use MockWebServer or focused OkHttp interceptor tests following existing module style.
-
-## Validation
-
-Run:
-
-```bash
-rtk ./gradlew :molapi-http-retrofit:testAndroidHostTest
+```kotlin
+val okHttpClient = OkHttpClient.Builder()
+    .addMolApiInterceptor(registry)
+    .build()
 ```
-
-If shared HTTP contracts changed too, run `$molapi-http-implementation` validation and
-`$molapi-change-validation`.

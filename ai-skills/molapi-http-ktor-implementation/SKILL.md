@@ -1,6 +1,6 @@
 ---
 name: molapi-http-ktor-implementation
-description: Implement, modify, or review the MolApi Ktor Client integration module. Use when a task touches molapi-http-ktor, dag.khinkal.molapi.http.ktor, MolApiKtorPlugin, Ktor request/response adapters, Ktor Client Send hook behavior, Ktor Gradle wiring, or Ktor integration tests.
+description: Implement, modify, or review the MolApi Ktor Client integration module. Use when a task touches molapi-http-ktor, dag.khinkal.molapi.http.ktor, MolApiKtorPlugin, Ktor request/response adapters, structured HttpUrl/query/header conversion, Ktor Client Send and receive pipeline behavior, Ktor Gradle wiring, or Ktor integration tests.
 ---
 
 # MolApi Ktor Implementation
@@ -34,42 +34,70 @@ Use `ksrc --help` before inspecting Ktor dependency sources.
 Preserve behavior:
 
 - `MolApiKtorPlugin` requires a registry configured as
-  `ReadApiMockRegistry<HttpRequest, ApiRequestMatcher<HttpRequest>, HttpResponse, *>`.
-- Convert supported Ktor requests to MolApi `HttpRequest`.
+  `ReadApiMockRegistry<HttpRequest, ApiRequestMatcher<HttpRequest>, HttpResponse>`.
+- Convert supported Ktor requests to MolApi `HttpRequest`, including protocol, host, effective port,
+  encoded path, ordered query values, headers, and body.
 - Convert MolApi `HttpResponse` to a Ktor client call/response.
 - Hook into Ktor Client send flow.
 - If request conversion fails, method is unsupported, or no mock is found, proceed with the real
   Ktor request.
 - Supported methods must match `HttpMethod`.
 
-## Implementation Rules
+## Usage example
 
-- Do not add Ktor server APIs.
-- Do not add delay, fallback settings, semantic JSON matching, URL model, or header matching unless
-  explicitly requested.
-- Keep dependencies scoped to Ktor Client.
-- Keep adapter logic small and testable.
-- Preserve response status, headers, body, request association, and receive pipeline behavior.
+```kotlin
+import dag.khinkal.molapi.http.dsl.get
+import dag.khinkal.molapi.http.dsl.http
+import dag.khinkal.molapi.http.dsl.patch
+import dag.khinkal.molapi.http.dsl.post
+import dag.khinkal.molapi.http.dsl.put
+import dag.khinkal.molapi.http.model.Headers
+import dag.khinkal.molapi.http.model.HttpMethod
+import dag.khinkal.molapi.http.model.HttpResponse
+import dag.khinkal.molapi.http.model.HttpUrl
+import dag.khinkal.molapi.http.model.JsonBody
+import dag.khinkal.molapi.http.registry.HttpInMemoryApiMockRegistry
 
-## Tests
+val registry = HttpInMemoryApiMockRegistry().apply {
+    // A JSON string shortcut.
+    get(
+        path = "/todos",
+        json = """[{"id":1,"title":"from molapi","completed":false}]""",
+    )
 
-Use common tests with Ktor Client test utilities. Cover:
+    // A full response, including custom headers and status.
+    post(
+        url = HttpUrl(path = "/todos"),
+        headers = Headers.jsonContent(),
+        body = JsonBody("""{"title":"new"}"""),
+        response = HttpResponse(
+            body = JsonBody("""{"id":2,"title":"new","completed":false}"""),
+            headers = Headers.jsonContent(),
+            statusCode = 201,
+        ),
+    )
 
-- mocked response short-circuit
-- no-mock pass-through
-- unsupported method pass-through
-- request URL/method/body/header conversion
-- response status/header/body conversion
-- plugin configuration error when registry is missing
+    // An arbitrary response body with its metadata.
+    put(
+        path = "/todos/2",
+        response = JsonBody("""{"completed":true}"""),
+        responseHeaders = Headers.jsonContent(),
+        statusCode = 202,
+    )
 
-Use `kotlinx.coroutines.test` where suspend client behavior is involved.
+    // A response produced lazily from the request registration code.
+    patch("/todos/2") {
+        HttpResponse(body = JsonBody("""{"completed":false}"""))
+    }
 
-## Validation
-
-Run:
-
-```bash
-rtk ./gradlew :molapi-http-ktor:testAndroidHostTest :molapi-http-ktor:iosSimulatorArm64Test
+    // Without selected http method
+    http(
+        method = HttpMethod.DELETE,
+        path = "/todos/2",
+        response = HttpResponse(statusCode = 204),
+    )
+}
 ```
 
-If sample Ktor usage changes, also run sample checks through `$molapi-change-validation`.
+- Preferred with lambda for comfort reading
+- First parameter in dsl without already set http method is url path
